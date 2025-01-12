@@ -41,7 +41,7 @@ const STLGenerator = ({
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = "adapter.stl";
+    link.download = `tube_adapter_inner${innerDiameter}mm_outer${outerDiameter}mm_height${height}mm.stl`;
     link.click();
   };
 
