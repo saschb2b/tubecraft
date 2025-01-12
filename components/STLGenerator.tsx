@@ -4,6 +4,7 @@ import React from "react";
 import { primitives, booleans } from "@jscad/modeling";
 // @ts-ignore
 import { serialize } from "@jscad/stl-serializer";
+import { Button } from "@mui/material";
 
 const STLGenerator = ({
   innerDiameter,
@@ -45,9 +46,14 @@ const STLGenerator = ({
   };
 
   return (
-    <button onClick={generateSTL} style={{ marginTop: "20px" }}>
+    <Button
+      variant="contained"
+      color="primary"
+      onClick={generateSTL}
+      sx={{ marginTop: 2 }}
+    >
       Download STL
-    </button>
+    </Button>
   );
 };
 

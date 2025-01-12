@@ -1,11 +1,12 @@
 "use client";
 
-import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
+import { Box, CssBaseline, ThemeProvider, createTheme } from "@mui/material";
 
 const theme = createTheme({
   palette: {
-    primary: { main: "#1976d2" },
-    secondary: { main: "#ff4081" },
+    mode: "dark",
+    primary: { main: "#0d47a1" },
+    secondary: { main: "#ff5722" },
   },
 });
 
@@ -15,11 +16,31 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body>
+    <html
+      lang="en"
+      style={{
+        minHeight: "100%",
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
+      <body
+        style={{
+          minHeight: "100%",
+          flexGrow: 1,
+        }}
+      >
         <ThemeProvider theme={theme}>
           <CssBaseline />
-          {children}
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              minHeight: "100vh",
+            }}
+          >
+            {children}
+          </Box>
         </ThemeProvider>
       </body>
     </html>
