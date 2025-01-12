@@ -3,6 +3,7 @@
 import React from "react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, Cylinder } from "@react-three/drei";
+import { useTheme } from "@mui/material";
 
 const AdapterPreview = ({
   innerDiameter,
@@ -13,6 +14,7 @@ const AdapterPreview = ({
   outerDiameter: number;
   height: number;
 }) => {
+  const theme = useTheme();
   // Calculate the maximum dimension to determine the camera distance
   const maxDimension = Math.max(innerDiameter, outerDiameter, height);
   const cameraDistance = maxDimension * 1.5; // Adjust multiplier as needed for optimal zoom
@@ -33,7 +35,7 @@ const AdapterPreview = ({
         target={[0, height / 2, 0]} // Focus on the center of the adapter
       />
       {/* Add GridHelper for the grid background */}
-      <gridHelper args={[maxDimension * 2, 20]} />
+      <gridHelper args={[maxDimension * 2, 20, theme.palette.secondary.main]} />
       <Cylinder
         args={[outerDiameter / 2, outerDiameter / 2, height, 32]}
         position={[0, height / 2, 0]}
