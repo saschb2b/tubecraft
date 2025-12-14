@@ -19,7 +19,7 @@
     "@mui/material-nextjs": "^6.3.0",
     "@react-three/drei": "^9.120.7",
     "@react-three/fiber": "^9.0.0-rc.3",
-    "next": "15.1.4",
+    "next": "15.1.11",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "three": "^0.172.0"
