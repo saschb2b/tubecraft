@@ -333,7 +333,7 @@ function generateRoundTubeSTL(config: RoundTubeConfig): ArrayBuffer {
         flareEnd,
       )
 
-      // Flare inner surface
+      // Flare inner surface - straight up from mainLength to length
       addTriangle(
         triangles,
         innerRadius * cos1,
@@ -359,7 +359,7 @@ function generateRoundTubeSTL(config: RoundTubeConfig): ArrayBuffer {
         flareEnd,
       )
 
-      // Flare top cap
+      // Flare top cap - connects flare outer to inner at the top
       addTriangle(
         triangles,
         innerRadius * cos1,
@@ -384,39 +384,6 @@ function generateRoundTubeSTL(config: RoundTubeConfig): ArrayBuffer {
         flareOuterRadius * sin2,
         flareEnd,
       )
-
-      if (flare.leadInChamfer) {
-        const chamferAngle = (flare.leadInAngle * Math.PI) / 180
-        const chamferSize = 1.5 // Small lead-in
-        const chamferEndRadius = flareOuterRadius - chamferSize
-        const chamferZ = flareEnd - chamferSize * Math.tan(chamferAngle)
-
-        // Lead-in chamfer surface
-        addTriangle(
-          triangles,
-          flareOuterRadius * cos1,
-          flareOuterRadius * sin1,
-          flareEnd,
-          chamferEndRadius * cos1,
-          chamferEndRadius * sin1,
-          chamferZ,
-          flareOuterRadius * cos2,
-          flareOuterRadius * sin2,
-          flareEnd,
-        )
-        addTriangle(
-          triangles,
-          flareOuterRadius * cos2,
-          flareOuterRadius * sin2,
-          flareEnd,
-          chamferEndRadius * cos1,
-          chamferEndRadius * sin1,
-          chamferZ,
-          chamferEndRadius * cos2,
-          chamferEndRadius * sin2,
-          chamferZ,
-        )
-      }
     }
   }
 
@@ -670,31 +637,33 @@ function generateRectangularTubeSTL(config: SquareTubeConfig | RectangularTubeCo
       outerBottomZ2,
     )
 
-    // Top cap
-    addTriangle(
-      triangles,
-      innerPoints[i][0],
-      innerPoints[i][1],
-      innerTopZ1,
-      outerPoints[i][0],
-      outerPoints[i][1],
-      outerTopZ1,
-      innerPoints[next][0],
-      innerPoints[next][1],
-      innerTopZ2,
-    )
-    addTriangle(
-      triangles,
-      innerPoints[next][0],
-      innerPoints[next][1],
-      innerTopZ2,
-      outerPoints[i][0],
-      outerPoints[i][1],
-      outerTopZ1,
-      outerPoints[next][0],
-      outerPoints[next][1],
-      outerTopZ2,
-    )
+    if (!useFlare) {
+      // Top cap
+      addTriangle(
+        triangles,
+        innerPoints[i][0],
+        innerPoints[i][1],
+        innerTopZ1,
+        outerPoints[i][0],
+        outerPoints[i][1],
+        outerTopZ1,
+        innerPoints[next][0],
+        innerPoints[next][1],
+        innerTopZ2,
+      )
+      addTriangle(
+        triangles,
+        innerPoints[next][0],
+        innerPoints[next][1],
+        innerTopZ2,
+        outerPoints[i][0],
+        outerPoints[i][1],
+        outerTopZ1,
+        outerPoints[next][0],
+        outerPoints[next][1],
+        outerTopZ2,
+      )
+    }
   }
 
   if (useFlare) {
@@ -709,7 +678,6 @@ function generateRectangularTubeSTL(config: SquareTubeConfig | RectangularTubeCo
     for (let i = 0; i < n; i++) {
       const next = (i + 1) % n
 
-      // Flare outer wall
       addTriangle(
         triangles,
         outerPoints[i][0],
@@ -735,7 +703,6 @@ function generateRectangularTubeSTL(config: SquareTubeConfig | RectangularTubeCo
         flareEnd,
       )
 
-      // Flare inner surface
       addTriangle(
         triangles,
         innerPoints[i][0],
@@ -761,7 +728,6 @@ function generateRectangularTubeSTL(config: SquareTubeConfig | RectangularTubeCo
         flareEnd,
       )
 
-      // Flare top cap
       addTriangle(
         triangles,
         innerPoints[i][0],
