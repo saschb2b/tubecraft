@@ -1,127 +1,134 @@
-export type TubeShape = "round" | "square" | "rectangular"
-export type CutType = "flat" | "miter" | "saddle" | "chamfer"
+export type TubeShape = "round" | "square" | "rectangular";
+export type CutType = "flat" | "miter" | "saddle" | "chamfer";
 
 export interface MiterCutConfig {
-  type: "miter"
-  angle: number // Angle in degrees (0-60)
+  type: "miter";
+  angle: number; // Angle in degrees (0-60)
 }
 
 export interface SaddleCutConfig {
-  type: "saddle"
-  targetDiameter: number // Diameter of the pipe this will connect to
-  angle: number // Angle of intersection (typically 90 for T-joint)
+  type: "saddle";
+  targetDiameter: number; // Diameter of the pipe this will connect to
+  angle: number; // Angle of intersection (typically 90 for T-joint)
 }
 
 export interface FlatCutConfig {
-  type: "flat"
+  type: "flat";
 }
 
 export interface ChamferCutConfig {
-  type: "chamfer"
-  angle: number // Chamfer angle in degrees (typically 45)
-  depth: number // How far the chamfer extends inward
+  type: "chamfer";
+  angle: number; // Chamfer angle in degrees (typically 45)
+  depth: number; // How far the chamfer extends inward
 }
 
-export type EndCutConfig = FlatCutConfig | MiterCutConfig | SaddleCutConfig | ChamferCutConfig
+export type EndCutConfig =
+  | FlatCutConfig
+  | MiterCutConfig
+  | SaddleCutConfig
+  | ChamferCutConfig;
 
 export interface FlareConfig {
-  enabled: boolean
-  diameter: number
-  width: number
-  height: number
-  length: number
+  enabled: boolean;
+  diameter: number;
+  width: number;
+  height: number;
+  length: number;
   // New press-fit specific options
-  clearance: number // Radial clearance for fit tolerance
-  fitType: "loose" | "snug" | "interference"
-  leadInChamfer: boolean // Auto chamfer on flare opening
-  leadInAngle: number // Chamfer angle
-  stopShoulder: boolean // Internal step for consistent seating
-  stopDepth: number // Depth of the stop shoulder
-  antiRotation: boolean // Flat/key to prevent spinning
-  antiRotationType: "flat" | "key" | "notch"
+  clearance: number; // Radial clearance for fit tolerance
+  fitType: "loose" | "snug" | "interference";
+  leadInChamfer: boolean; // Auto chamfer on flare opening
+  leadInAngle: number; // Chamfer angle
+  stopShoulder: boolean; // Internal step for consistent seating
+  stopDepth: number; // Depth of the stop shoulder
+  antiRotation: boolean; // Flat/key to prevent spinning
+  antiRotationType: "flat" | "key" | "notch";
 }
 
 export interface HoleConfig {
-  enabled: boolean
-  count: number
-  diameter: number
-  positionAlongLength: number // percentage 0-100
-  rotationOffset: number // degrees
+  enabled: boolean;
+  count: number;
+  diameter: number;
+  positionAlongLength: number; // percentage 0-100
+  rotationOffset: number; // degrees
 }
 
 export interface DrainHoleConfig {
-  enabled: boolean
-  diameter: number
+  enabled: boolean;
+  diameter: number;
 }
 
 export interface ZipTieSlotConfig {
-  enabled: boolean
-  width: number
-  height: number
-  positionAlongLength: number // percentage 0-100
+  enabled: boolean;
+  width: number;
+  height: number;
+  positionAlongLength: number; // percentage 0-100
 }
 
 export interface HolesAndSlotsConfig {
-  sideHoles: HoleConfig
-  drainHole: DrainHoleConfig
-  zipTieSlots: ZipTieSlotConfig
+  sideHoles: HoleConfig;
+  drainHole: DrainHoleConfig;
+  zipTieSlots: ZipTieSlotConfig;
 }
 
-export type ConnectorMode = "none" | "coupler" | "reducer" | "male-female"
+export type ConnectorMode = "none" | "coupler" | "reducer" | "male-female";
 
 export interface CouplerConfig {
-  length: number
-  wallThickness: number
+  length: number;
+  wallThickness: number;
 }
 
 export interface ReducerConfig {
-  targetInnerDiameter: number
-  targetOuterDiameter: number
-  transitionLength: number
+  targetInnerDiameter: number;
+  targetOuterDiameter: number;
+  transitionLength: number;
 }
 
 export interface ConnectorConfig {
-  mode: ConnectorMode
-  coupler: CouplerConfig
-  reducer: ReducerConfig
+  mode: ConnectorMode;
+  coupler: CouplerConfig;
+  reducer: ReducerConfig;
 }
 
 interface BaseTubeConfig {
-  length: number
-  flare: FlareConfig
-  topCut: EndCutConfig
-  bottomCut: EndCutConfig
-  holes: HolesAndSlotsConfig
-  connector: ConnectorConfig
+  length: number;
+  flare: FlareConfig;
+  topCut: EndCutConfig;
+  bottomCut: EndCutConfig;
+  holes: HolesAndSlotsConfig;
+  connector: ConnectorConfig;
 }
 
 export interface RoundTubeConfig extends BaseTubeConfig {
-  shape: "round"
-  innerDiameter: number
-  outerDiameter: number
+  shape: "round";
+  innerDiameter: number;
+  outerDiameter: number;
 }
 
 export interface SquareTubeConfig extends BaseTubeConfig {
-  shape: "square"
-  innerSize: number
-  outerSize: number
-  cornerRadius: number
+  shape: "square";
+  innerSize: number;
+  outerSize: number;
+  cornerRadius: number;
 }
 
 export interface RectangularTubeConfig extends BaseTubeConfig {
-  shape: "rectangular"
-  innerWidth: number
-  innerHeight: number
-  outerWidth: number
-  outerHeight: number
-  cornerRadius: number
+  shape: "rectangular";
+  innerWidth: number;
+  innerHeight: number;
+  outerWidth: number;
+  outerHeight: number;
+  cornerRadius: number;
 }
 
-export type TubeConfig = RoundTubeConfig | SquareTubeConfig | RectangularTubeConfig
+export type TubeConfig =
+  | RoundTubeConfig
+  | SquareTubeConfig
+  | RectangularTubeConfig;
 
 // Legacy type alias for backwards compatibility
-export type TopCutConfig = EndCutConfig
-export type TopCutType = CutType
+export type TopCutConfig = EndCutConfig;
+export type TopCutType = CutType;
 
 export const DEFAULT_FLARE: FlareConfig = {
   enabled: false,
@@ -137,11 +144,11 @@ export const DEFAULT_FLARE: FlareConfig = {
   stopDepth: 2,
   antiRotation: false,
   antiRotationType: "flat",
-}
+};
 
 export const DEFAULT_CUT: EndCutConfig = {
   type: "flat",
-}
+};
 
 export const DEFAULT_HOLES: HolesAndSlotsConfig = {
   sideHoles: {
@@ -161,7 +168,7 @@ export const DEFAULT_HOLES: HolesAndSlotsConfig = {
     height: 2,
     positionAlongLength: 25,
   },
-}
+};
 
 export const DEFAULT_CONNECTOR: ConnectorConfig = {
   mode: "none",
@@ -174,7 +181,7 @@ export const DEFAULT_CONNECTOR: ConnectorConfig = {
     targetOuterDiameter: 42,
     transitionLength: 20,
   },
-}
+};
 
 export const DEFAULT_ROUND_CONFIG: RoundTubeConfig = {
   shape: "round",
@@ -186,7 +193,7 @@ export const DEFAULT_ROUND_CONFIG: RoundTubeConfig = {
   bottomCut: { ...DEFAULT_CUT },
   holes: { ...DEFAULT_HOLES },
   connector: { ...DEFAULT_CONNECTOR },
-}
+};
 
 export const DEFAULT_SQUARE_CONFIG: SquareTubeConfig = {
   shape: "square",
@@ -199,7 +206,7 @@ export const DEFAULT_SQUARE_CONFIG: SquareTubeConfig = {
   bottomCut: { ...DEFAULT_CUT },
   holes: { ...DEFAULT_HOLES },
   connector: { ...DEFAULT_CONNECTOR },
-}
+};
 
 export const DEFAULT_RECTANGULAR_CONFIG: RectangularTubeConfig = {
   shape: "rectangular",
@@ -214,4 +221,4 @@ export const DEFAULT_RECTANGULAR_CONFIG: RectangularTubeConfig = {
   bottomCut: { ...DEFAULT_CUT },
   holes: { ...DEFAULT_HOLES },
   connector: { ...DEFAULT_CONNECTOR },
-}
+};

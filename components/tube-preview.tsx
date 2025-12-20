@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import { Canvas } from "@react-three/fiber"
+import { Canvas } from "@react-three/fiber";
 import {
   OrbitControls,
   Environment,
@@ -10,17 +10,17 @@ import {
   Line,
   Text,
   ContactShadows,
-} from "@react-three/drei"
-import { useMemo } from "react"
-import * as THREE from "three"
-import type { TubeConfig, EndCutConfig } from "@/lib/tube-types"
+} from "@react-three/drei";
+import { useMemo } from "react";
+import * as THREE from "three";
+import type { TubeConfig, EndCutConfig } from "@/lib/tube-types";
 
 interface TubePreviewProps {
-  config: TubeConfig
+  config: TubeConfig;
 }
 
 function GridFloor({ size }: { size: number }) {
-  const gridSize = Math.max(size * 2, 100)
+  const gridSize = Math.max(size * 2, 100);
 
   return (
     <group position={[0, -0.01, 0]}>
@@ -42,7 +42,9 @@ function GridFloor({ size }: { size: number }) {
           <bufferAttribute
             attach="attributes-position"
             count={2}
-            array={new Float32Array([-gridSize / 2, 0.01, 0, gridSize / 2, 0.01, 0])}
+            array={
+              new Float32Array([-gridSize / 2, 0.01, 0, gridSize / 2, 0.01, 0])
+            }
             itemSize={3}
           />
         </bufferGeometry>
@@ -53,14 +55,16 @@ function GridFloor({ size }: { size: number }) {
           <bufferAttribute
             attach="attributes-position"
             count={2}
-            array={new Float32Array([0, 0.01, -gridSize / 2, 0, 0.01, gridSize / 2])}
+            array={
+              new Float32Array([0, 0.01, -gridSize / 2, 0, 0.01, gridSize / 2])
+            }
             itemSize={3}
           />
         </bufferGeometry>
         <lineBasicMaterial color="#3b82f6" linewidth={2} />
       </line>
     </group>
-  )
+  );
 }
 
 function HorizontalDimension({
@@ -70,13 +74,13 @@ function HorizontalDimension({
   label,
   color = "#f59e0b",
 }: {
-  width: number
-  y: number
-  z: number
-  label: string
-  color?: string
+  width: number;
+  y: number;
+  z: number;
+  label: string;
+  color?: string;
 }) {
-  const halfWidth = width / 2
+  const halfWidth = width / 2;
 
   return (
     <group>
@@ -114,7 +118,7 @@ function HorizontalDimension({
         {label}mm
       </Text>
     </group>
-  )
+  );
 }
 
 function VerticalDimension({
@@ -125,12 +129,12 @@ function VerticalDimension({
   color = "#f59e0b",
   startY = 0,
 }: {
-  height: number
-  x: number
-  z: number
-  label: string
-  color?: string
-  startY?: number
+  height: number;
+  x: number;
+  z: number;
+  label: string;
+  color?: string;
+  startY?: number;
 }) {
   return (
     <group>
@@ -168,7 +172,7 @@ function VerticalDimension({
         {label}mm
       </Text>
     </group>
-  )
+  );
 }
 
 function DepthDimension({
@@ -178,13 +182,13 @@ function DepthDimension({
   label,
   color = "#f59e0b",
 }: {
-  depth: number
-  y: number
-  x: number
-  label: string
-  color?: string
+  depth: number;
+  y: number;
+  x: number;
+  label: string;
+  color?: string;
 }) {
-  const halfDepth = depth / 2
+  const halfDepth = depth / 2;
 
   return (
     <group>
@@ -222,27 +226,49 @@ function DepthDimension({
         {label}mm
       </Text>
     </group>
-  )
+  );
 }
 
 function DimensionIndicators({ config }: { config: TubeConfig }) {
-  const isRectangular = config.shape === "rectangular"
-  const isSquare = config.shape === "square"
-  const isRound = config.shape === "round"
+  const isRectangular = config.shape === "rectangular";
+  const isSquare = config.shape === "square";
+  const isRound = config.shape === "round";
 
-  const outerWidth = isRound ? config.outerDiameter : isSquare ? config.outerSize : config.outerWidth
-  const outerHeight = isRound ? config.outerDiameter : isSquare ? config.outerSize : config.outerHeight
-  const innerWidth = isRound ? config.innerDiameter : isSquare ? config.innerSize : config.innerWidth
-  const innerHeight = isRound ? config.innerDiameter : isSquare ? config.innerSize : config.innerHeight
+  const outerWidth = isRound
+    ? config.outerDiameter
+    : isSquare
+      ? config.outerSize
+      : config.outerWidth;
+  const outerHeight = isRound
+    ? config.outerDiameter
+    : isSquare
+      ? config.outerSize
+      : config.outerHeight;
+  const innerWidth = isRound
+    ? config.innerDiameter
+    : isSquare
+      ? config.innerSize
+      : config.innerWidth;
+  const innerHeight = isRound
+    ? config.innerDiameter
+    : isSquare
+      ? config.innerSize
+      : config.innerHeight;
 
-  const maxOuter = Math.max(outerWidth, outerHeight)
-  const xOffset = maxOuter / 2 + 15
-  const useFlare = config.flare.enabled && config.topCut.type === "flat"
-  const flareStartY = useFlare ? config.length - config.flare.length : 0
+  const maxOuter = Math.max(outerWidth, outerHeight);
+  const xOffset = maxOuter / 2 + 15;
+  const useFlare = config.flare.enabled && config.topCut.type === "flat";
+  const flareStartY = useFlare ? config.length - config.flare.length : 0;
 
   return (
     <group>
-      <VerticalDimension height={config.length} x={xOffset} z={0} label={config.length.toString()} color="#f59e0b" />
+      <VerticalDimension
+        height={config.length}
+        x={xOffset}
+        z={0}
+        label={config.length.toString()}
+        color="#f59e0b"
+      />
 
       <HorizontalDimension
         width={outerWidth}
@@ -308,7 +334,11 @@ function DimensionIndicators({ config }: { config: TubeConfig }) {
               lineWidth={1.5}
             />
             <Text
-              position={[-xOffset - 8, flareStartY + config.flare.length / 2, 0]}
+              position={[
+                -xOffset - 8,
+                flareStartY + config.flare.length / 2,
+                0,
+              ]}
               fontSize={Math.max(4, config.flare.length * 0.15)}
               color="#ec4899"
               anchorX="right"
@@ -322,7 +352,11 @@ function DimensionIndicators({ config }: { config: TubeConfig }) {
             width={isRound ? config.flare.diameter : config.flare.width}
             y={config.length + 16}
             z={-(maxOuter / 2 + 5)}
-            label={isRound ? `⌀${config.flare.diameter}` : config.flare.width.toString()}
+            label={
+              isRound
+                ? `⌀${config.flare.diameter}`
+                : config.flare.width.toString()
+            }
             color="#ec4899"
           />
 
@@ -382,7 +416,7 @@ function DimensionIndicators({ config }: { config: TubeConfig }) {
         />
       )}
     </group>
-  )
+  );
 }
 
 function getTopZForPreview(
@@ -393,24 +427,28 @@ function getTopZForPreview(
   outerRadius: number,
 ): number {
   if (topCut.type === "flat") {
-    return baseLength
+    return baseLength;
   } else if (topCut.type === "miter") {
-    const miterAngle = (topCut.angle * Math.PI) / 180
-    return baseLength + radius * Math.tan(miterAngle) * Math.cos(angle)
+    const miterAngle = (topCut.angle * Math.PI) / 180;
+    return baseLength + radius * Math.tan(miterAngle) * Math.cos(angle);
   } else if (topCut.type === "saddle") {
-    const targetRadius = topCut.targetDiameter / 2
-    const x = outerRadius * Math.cos(angle)
-    const distFromCenter = Math.abs(x)
+    const targetRadius = topCut.targetDiameter / 2;
+    const x = outerRadius * Math.cos(angle);
+    const distFromCenter = Math.abs(x);
 
     if (distFromCenter <= targetRadius) {
-      const saddleHeight = Math.sqrt(targetRadius * targetRadius - distFromCenter * distFromCenter)
-      return baseLength + saddleHeight * Math.sin((topCut.angle * Math.PI) / 180)
+      const saddleHeight = Math.sqrt(
+        targetRadius * targetRadius - distFromCenter * distFromCenter,
+      );
+      return (
+        baseLength + saddleHeight * Math.sin((topCut.angle * Math.PI) / 180)
+      );
     }
-    return baseLength
+    return baseLength;
   } else if (topCut.type === "chamfer") {
-    return baseLength
+    return baseLength;
   }
-  return baseLength
+  return baseLength;
 }
 
 function getBottomZForPreview(
@@ -421,146 +459,199 @@ function getBottomZForPreview(
   bottomOffset: number,
 ): number {
   if (bottomCut.type === "flat") {
-    return bottomOffset
+    return bottomOffset;
   } else if (bottomCut.type === "miter") {
-    const miterAngle = (bottomCut.angle * Math.PI) / 180
-    return bottomOffset + Math.max(0, -radius * Math.tan(miterAngle) * Math.cos(angle))
+    const miterAngle = (bottomCut.angle * Math.PI) / 180;
+    return (
+      bottomOffset +
+      Math.max(0, -radius * Math.tan(miterAngle) * Math.cos(angle))
+    );
   } else if (bottomCut.type === "saddle") {
-    const targetRadius = bottomCut.targetDiameter / 2
-    const x = outerRadius * Math.cos(angle)
-    const distFromCenter = Math.abs(x)
+    const targetRadius = bottomCut.targetDiameter / 2;
+    const x = outerRadius * Math.cos(angle);
+    const distFromCenter = Math.abs(x);
 
     if (distFromCenter <= targetRadius) {
-      const saddleHeight = Math.sqrt(targetRadius * targetRadius - distFromCenter * distFromCenter)
-      return bottomOffset - saddleHeight * Math.sin((bottomCut.angle * Math.PI) / 180)
+      const saddleHeight = Math.sqrt(
+        targetRadius * targetRadius - distFromCenter * distFromCenter,
+      );
+      return (
+        bottomOffset -
+        saddleHeight * Math.sin((bottomCut.angle * Math.PI) / 180)
+      );
     }
-    return bottomOffset
+    return bottomOffset;
   }
-  return bottomOffset
+  return bottomOffset;
 }
 
-function calculateBottomOffset(bottomCut: EndCutConfig, outerRadius: number, segments: number): number {
-  if (bottomCut.type === "flat" || bottomCut.type === "chamfer") return 0
+function calculateBottomOffset(
+  bottomCut: EndCutConfig,
+  outerRadius: number,
+  segments: number,
+): number {
+  if (bottomCut.type === "flat" || bottomCut.type === "chamfer") return 0;
 
-  let maxNegative = 0
+  let maxNegative = 0;
   for (let i = 0; i <= segments; i++) {
-    const angle = (i / segments) * Math.PI * 2
-    let z = 0
+    const angle = (i / segments) * Math.PI * 2;
+    let z = 0;
     if (bottomCut.type === "miter") {
-      const miterAngle = (bottomCut.angle * Math.PI) / 180
-      z = -outerRadius * Math.tan(miterAngle) * Math.cos(angle)
+      const miterAngle = (bottomCut.angle * Math.PI) / 180;
+      z = -outerRadius * Math.tan(miterAngle) * Math.cos(angle);
     } else if (bottomCut.type === "saddle") {
-      const targetRadius = bottomCut.targetDiameter / 2
-      const x = outerRadius * Math.cos(angle)
-      const distFromCenter = Math.abs(x)
+      const targetRadius = bottomCut.targetDiameter / 2;
+      const x = outerRadius * Math.cos(angle);
+      const distFromCenter = Math.abs(x);
       if (distFromCenter <= targetRadius) {
-        z = -Math.sqrt(targetRadius * targetRadius - distFromCenter * distFromCenter)
+        z = -Math.sqrt(
+          targetRadius * targetRadius - distFromCenter * distFromCenter,
+        );
       }
     }
-    if (z < maxNegative) maxNegative = z
+    if (z < maxNegative) maxNegative = z;
   }
-  return -maxNegative
+  return -maxNegative;
 }
 
-function RoundTubeMesh({ config }: { config: TubeConfig & { shape: "round" } }) {
-  const { innerDiameter, outerDiameter, length, flare, topCut, bottomCut } = config
-  const innerRadius = innerDiameter / 2
-  const outerRadius = outerDiameter / 2
-  const useFlare = flare.enabled && topCut.type === "flat"
-  const mainLength = useFlare ? length - flare.length : length
-  const segments = 64
+function RoundTubeMesh({
+  config,
+}: {
+  config: TubeConfig & { shape: "round" };
+}) {
+  const { innerDiameter, outerDiameter, length, flare, topCut, bottomCut } =
+    config;
+  const innerRadius = innerDiameter / 2;
+  const outerRadius = outerDiameter / 2;
+  const useFlare = flare.enabled && topCut.type === "flat";
+  const mainLength = useFlare ? length - flare.length : length;
+  const segments = 64;
 
   const bottomOffset = useMemo(
     () => calculateBottomOffset(bottomCut, outerRadius, segments),
     [bottomCut, outerRadius, segments],
-  )
+  );
 
   const geometry = useMemo(() => {
-    const positions: number[] = []
-    const indices: number[] = []
+    const positions: number[] = [];
+    const indices: number[] = [];
 
     for (let i = 0; i <= segments; i++) {
-      const angle = (i / segments) * Math.PI * 2
-      const cos = Math.cos(angle)
-      const sin = Math.sin(angle)
+      const angle = (i / segments) * Math.PI * 2;
+      const cos = Math.cos(angle);
+      const sin = Math.sin(angle);
 
-      const topZOuter = getTopZForPreview(angle, outerRadius, mainLength, topCut, outerRadius)
-      const topZInner = getTopZForPreview(angle, innerRadius, mainLength, topCut, outerRadius)
-      const bottomZOuter = getBottomZForPreview(angle, outerRadius, bottomCut, outerRadius, bottomOffset)
-      const bottomZInner = getBottomZForPreview(angle, innerRadius, bottomCut, outerRadius, bottomOffset)
+      const topZOuter = getTopZForPreview(
+        angle,
+        outerRadius,
+        mainLength,
+        topCut,
+        outerRadius,
+      );
+      const topZInner = getTopZForPreview(
+        angle,
+        innerRadius,
+        mainLength,
+        topCut,
+        outerRadius,
+      );
+      const bottomZOuter = getBottomZForPreview(
+        angle,
+        outerRadius,
+        bottomCut,
+        outerRadius,
+        bottomOffset,
+      );
+      const bottomZInner = getBottomZForPreview(
+        angle,
+        innerRadius,
+        bottomCut,
+        outerRadius,
+        bottomOffset,
+      );
 
-      positions.push(outerRadius * cos, bottomZOuter, outerRadius * sin)
-      positions.push(innerRadius * cos, bottomZInner, innerRadius * sin)
-      positions.push(outerRadius * cos, topZOuter, outerRadius * sin)
-      positions.push(innerRadius * cos, topZInner, innerRadius * sin)
+      positions.push(outerRadius * cos, bottomZOuter, outerRadius * sin);
+      positions.push(innerRadius * cos, bottomZInner, innerRadius * sin);
+      positions.push(outerRadius * cos, topZOuter, outerRadius * sin);
+      positions.push(innerRadius * cos, topZInner, innerRadius * sin);
     }
 
-    const vertsPerSegment = 4
+    const vertsPerSegment = 4;
 
     for (let i = 0; i < segments; i++) {
-      const curr = i * vertsPerSegment
-      const next = (i + 1) * vertsPerSegment
+      const curr = i * vertsPerSegment;
+      const next = (i + 1) * vertsPerSegment;
 
       // Outer wall
-      indices.push(curr + 0, next + 0, curr + 2)
-      indices.push(next + 0, next + 2, curr + 2)
+      indices.push(curr + 0, next + 0, curr + 2);
+      indices.push(next + 0, next + 2, curr + 2);
 
       // Inner wall
-      indices.push(curr + 1, curr + 3, next + 1)
-      indices.push(next + 1, curr + 3, next + 3)
+      indices.push(curr + 1, curr + 3, next + 1);
+      indices.push(next + 1, curr + 3, next + 3);
 
       // Bottom cap
-      indices.push(curr + 0, curr + 1, next + 0)
-      indices.push(next + 0, curr + 1, next + 1)
+      indices.push(curr + 0, curr + 1, next + 0);
+      indices.push(next + 0, curr + 1, next + 1);
 
       // Top cap
-      indices.push(curr + 2, next + 2, curr + 3)
-      indices.push(next + 2, next + 3, curr + 3)
+      indices.push(curr + 2, next + 2, curr + 3);
+      indices.push(next + 2, next + 3, curr + 3);
     }
 
-    const geo = new THREE.BufferGeometry()
-    geo.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3))
-    geo.setIndex(indices)
-    geo.computeVertexNormals()
-    return geo
-  }, [innerRadius, outerRadius, mainLength, topCut, bottomCut, bottomOffset])
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute(
+      "position",
+      new THREE.Float32BufferAttribute(positions, 3),
+    );
+    geo.setIndex(indices);
+    geo.computeVertexNormals();
+    return geo;
+  }, [innerRadius, outerRadius, mainLength, topCut, bottomCut, bottomOffset]);
 
   const flareGeometry = useMemo(() => {
-    if (!useFlare) return null
+    if (!useFlare) return null;
 
-    const flareOuterRadius = (flare.diameter + flare.clearance * 2) / 2
-    const positions: number[] = []
-    const indices: number[] = []
+    const flareOuterRadius = (flare.diameter + flare.clearance * 2) / 2;
+    const positions: number[] = [];
+    const indices: number[] = [];
 
     for (let i = 0; i <= segments; i++) {
-      const angle = (i / segments) * Math.PI * 2
-      const cos = Math.cos(angle)
-      const sin = Math.sin(angle)
+      const angle = (i / segments) * Math.PI * 2;
+      const cos = Math.cos(angle);
+      const sin = Math.sin(angle);
 
-      positions.push(outerRadius * cos, 0, outerRadius * sin)
-      positions.push(innerRadius * cos, 0, innerRadius * sin)
-      positions.push(flareOuterRadius * cos, flare.length, flareOuterRadius * sin)
-      positions.push(innerRadius * cos, flare.length, innerRadius * sin)
+      positions.push(outerRadius * cos, 0, outerRadius * sin);
+      positions.push(innerRadius * cos, 0, innerRadius * sin);
+      positions.push(
+        flareOuterRadius * cos,
+        flare.length,
+        flareOuterRadius * sin,
+      );
+      positions.push(innerRadius * cos, flare.length, innerRadius * sin);
     }
 
     for (let i = 0; i < segments; i++) {
-      const curr = i * 4
-      const next = (i + 1) * 4
+      const curr = i * 4;
+      const next = (i + 1) * 4;
 
-      indices.push(curr, next, curr + 2)
-      indices.push(next, next + 2, curr + 2)
-      indices.push(curr + 1, curr + 3, next + 1)
-      indices.push(next + 1, curr + 3, next + 3)
-      indices.push(curr + 2, next + 2, curr + 3)
-      indices.push(next + 2, next + 3, curr + 3)
+      indices.push(curr, next, curr + 2);
+      indices.push(next, next + 2, curr + 2);
+      indices.push(curr + 1, curr + 3, next + 1);
+      indices.push(next + 1, curr + 3, next + 3);
+      indices.push(curr + 2, next + 2, curr + 3);
+      indices.push(next + 2, next + 3, curr + 3);
     }
 
-    const geo = new THREE.BufferGeometry()
-    geo.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3))
-    geo.setIndex(indices)
-    geo.computeVertexNormals()
-    return geo
-  }, [flare, outerRadius, innerRadius, useFlare])
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute(
+      "position",
+      new THREE.Float32BufferAttribute(positions, 3),
+    );
+    geo.setIndex(indices);
+    geo.computeVertexNormals();
+    return geo;
+  }, [flare, outerRadius, innerRadius, useFlare]);
 
   return (
     <group position={[0, 0, 0]}>
@@ -585,188 +676,258 @@ function RoundTubeMesh({ config }: { config: TubeConfig & { shape: "round" } }) 
         </mesh>
       )}
     </group>
-  )
+  );
 }
 
-function getRectTopZForPreview(x: number, baseLength: number, topCut: EndCutConfig): number {
+function getRectTopZForPreview(
+  x: number,
+  baseLength: number,
+  topCut: EndCutConfig,
+): number {
   if (topCut.type === "flat") {
-    return baseLength
+    return baseLength;
   } else if (topCut.type === "miter") {
-    const miterAngle = (topCut.angle * Math.PI) / 180
-    return baseLength + x * Math.tan(miterAngle)
+    const miterAngle = (topCut.angle * Math.PI) / 180;
+    return baseLength + x * Math.tan(miterAngle);
   } else if (topCut.type === "saddle") {
-    const targetRadius = topCut.targetDiameter / 2
-    const distFromCenter = Math.abs(x)
+    const targetRadius = topCut.targetDiameter / 2;
+    const distFromCenter = Math.abs(x);
 
     if (distFromCenter <= targetRadius) {
-      const saddleHeight = Math.sqrt(targetRadius * targetRadius - distFromCenter * distFromCenter)
-      return baseLength + saddleHeight
+      const saddleHeight = Math.sqrt(
+        targetRadius * targetRadius - distFromCenter * distFromCenter,
+      );
+      return baseLength + saddleHeight;
     }
-    return baseLength
+    return baseLength;
   }
-  return baseLength
+  return baseLength;
 }
 
-function getRectBottomZForPreview(x: number, bottomCut: EndCutConfig, bottomOffset: number): number {
+function getRectBottomZForPreview(
+  x: number,
+  bottomCut: EndCutConfig,
+  bottomOffset: number,
+): number {
   if (bottomCut.type === "flat") {
-    return bottomOffset
+    return bottomOffset;
   } else if (bottomCut.type === "miter") {
-    const miterAngle = (bottomCut.angle * Math.PI) / 180
-    return bottomOffset + Math.max(0, -x * Math.tan(miterAngle))
+    const miterAngle = (bottomCut.angle * Math.PI) / 180;
+    return bottomOffset + Math.max(0, -x * Math.tan(miterAngle));
   } else if (bottomCut.type === "saddle") {
-    const targetRadius = bottomCut.targetDiameter / 2
-    const distFromCenter = Math.abs(x)
+    const targetRadius = bottomCut.targetDiameter / 2;
+    const distFromCenter = Math.abs(x);
 
     if (distFromCenter <= targetRadius) {
-      const saddleHeight = Math.sqrt(targetRadius * targetRadius - distFromCenter * distFromCenter)
-      return bottomOffset - saddleHeight
+      const saddleHeight = Math.sqrt(
+        targetRadius * targetRadius - distFromCenter * distFromCenter,
+      );
+      return bottomOffset - saddleHeight;
     }
-    return bottomOffset
+    return bottomOffset;
   }
-  return bottomOffset
+  return bottomOffset;
 }
 
-function calculateRectBottomOffset(bottomCut: EndCutConfig, outerPoints: THREE.Vector2[]): number {
-  if (bottomCut.type === "flat" || bottomCut.type === "chamfer") return 0
+function calculateRectBottomOffset(
+  bottomCut: EndCutConfig,
+  outerPoints: THREE.Vector2[],
+): number {
+  if (bottomCut.type === "flat" || bottomCut.type === "chamfer") return 0;
 
-  let maxNegative = 0
+  let maxNegative = 0;
   for (const pt of outerPoints) {
-    let z = 0
+    let z = 0;
     if (bottomCut.type === "miter") {
-      const miterAngle = (bottomCut.angle * Math.PI) / 180
-      z = -pt.x * Math.tan(miterAngle)
+      const miterAngle = (bottomCut.angle * Math.PI) / 180;
+      z = -pt.x * Math.tan(miterAngle);
     } else if (bottomCut.type === "saddle") {
-      const targetRadius = bottomCut.targetDiameter / 2
-      const distFromCenter = Math.abs(pt.x)
+      const targetRadius = bottomCut.targetDiameter / 2;
+      const distFromCenter = Math.abs(pt.x);
       if (distFromCenter <= targetRadius) {
-        z = -Math.sqrt(targetRadius * targetRadius - distFromCenter * distFromCenter)
+        z = -Math.sqrt(
+          targetRadius * targetRadius - distFromCenter * distFromCenter,
+        );
       }
     }
-    if (z < maxNegative) maxNegative = z
+    if (z < maxNegative) maxNegative = z;
   }
-  return -maxNegative
+  return -maxNegative;
 }
 
-function RectangularTubeMesh({ config }: { config: TubeConfig & { shape: "square" | "rectangular" } }) {
-  const isSquare = config.shape === "square"
-  const innerWidth = isSquare ? config.innerSize : config.innerWidth
-  const innerHeight = isSquare ? config.innerSize : config.innerHeight
-  const outerWidth = isSquare ? config.outerSize : config.outerWidth
-  const outerHeight = isSquare ? config.outerSize : config.outerHeight
-  const { length, cornerRadius, flare, topCut, bottomCut } = config
-  const useFlare = flare.enabled && topCut.type === "flat"
-  const mainLength = useFlare ? length - flare.length : length
+function RectangularTubeMesh({
+  config,
+}: {
+  config: TubeConfig & { shape: "square" | "rectangular" };
+}) {
+  const isSquare = config.shape === "square";
+  const innerWidth = isSquare ? config.innerSize : config.innerWidth;
+  const innerHeight = isSquare ? config.innerSize : config.innerHeight;
+  const outerWidth = isSquare ? config.outerSize : config.outerWidth;
+  const outerHeight = isSquare ? config.outerSize : config.outerHeight;
+  const { length, cornerRadius, flare, topCut, bottomCut } = config;
+  const useFlare = flare.enabled && topCut.type === "flat";
+  const mainLength = useFlare ? length - flare.length : length;
 
   const createRoundedRectShape = (w: number, h: number, r: number) => {
-    const shape = new THREE.Shape()
-    const hw = w / 2
-    const hh = h / 2
-    const radius = Math.min(r, hw, hh)
+    const shape = new THREE.Shape();
+    const hw = w / 2;
+    const hh = h / 2;
+    const radius = Math.min(r, hw, hh);
 
-    shape.moveTo(-hw + radius, -hh)
-    shape.lineTo(hw - radius, -hh)
-    shape.quadraticCurveTo(hw, -hh, hw, -hh + radius)
-    shape.lineTo(hw, hh - radius)
-    shape.quadraticCurveTo(hw, hh, hw - radius, hh)
-    shape.lineTo(-hw + radius, hh)
-    shape.quadraticCurveTo(-hw, hh, -hw, hh - radius)
-    shape.lineTo(-hw, -hh + radius)
-    shape.quadraticCurveTo(-hw, -hh, -hw + radius, -hh)
+    shape.moveTo(-hw + radius, -hh);
+    shape.lineTo(hw - radius, -hh);
+    shape.quadraticCurveTo(hw, -hh, hw, -hh + radius);
+    shape.lineTo(hw, hh - radius);
+    shape.quadraticCurveTo(hw, hh, hw - radius, hh);
+    shape.lineTo(-hw + radius, hh);
+    shape.quadraticCurveTo(-hw, hh, -hw, hh - radius);
+    shape.lineTo(-hw, -hh + radius);
+    shape.quadraticCurveTo(-hw, -hh, -hw + radius, -hh);
 
-    return shape
-  }
+    return shape;
+  };
 
   const geometry = useMemo(() => {
-    const outer = createRoundedRectShape(outerWidth, outerHeight, cornerRadius)
-    const inner = createRoundedRectShape(innerWidth, innerHeight, cornerRadius)
+    const outer = createRoundedRectShape(outerWidth, outerHeight, cornerRadius);
+    const inner = createRoundedRectShape(innerWidth, innerHeight, cornerRadius);
 
-    const segments = 32
-    const outerPoints = outer.getPoints(segments)
-    const innerPoints = inner.getPoints(segments)
+    const segments = 32;
+    const outerPoints = outer.getPoints(segments);
+    const innerPoints = inner.getPoints(segments);
 
-    const bottomOffset = calculateRectBottomOffset(bottomCut, outerPoints)
+    const bottomOffset = calculateRectBottomOffset(bottomCut, outerPoints);
 
-    const n = outerPoints.length
-    const positions: number[] = []
-    const indices: number[] = []
+    const n = outerPoints.length;
+    const positions: number[] = [];
+    const indices: number[] = [];
 
     for (let i = 0; i < n; i++) {
-      const topZOuter = getRectTopZForPreview(outerPoints[i].x, mainLength, topCut)
-      const topZInner = getRectTopZForPreview(innerPoints[i].x, mainLength, topCut)
-      const bottomZOuter = getRectBottomZForPreview(outerPoints[i].x, bottomCut, bottomOffset)
-      const bottomZInner = getRectBottomZForPreview(innerPoints[i].x, bottomCut, bottomOffset)
+      const topZOuter = getRectTopZForPreview(
+        outerPoints[i].x,
+        mainLength,
+        topCut,
+      );
+      const topZInner = getRectTopZForPreview(
+        innerPoints[i].x,
+        mainLength,
+        topCut,
+      );
+      const bottomZOuter = getRectBottomZForPreview(
+        outerPoints[i].x,
+        bottomCut,
+        bottomOffset,
+      );
+      const bottomZInner = getRectBottomZForPreview(
+        innerPoints[i].x,
+        bottomCut,
+        bottomOffset,
+      );
 
-      positions.push(outerPoints[i].x, bottomZOuter, outerPoints[i].y)
-      positions.push(innerPoints[i].x, bottomZInner, innerPoints[i].y)
-      positions.push(outerPoints[i].x, topZOuter, outerPoints[i].y)
-      positions.push(innerPoints[i].x, topZInner, innerPoints[i].y)
+      positions.push(outerPoints[i].x, bottomZOuter, outerPoints[i].y);
+      positions.push(innerPoints[i].x, bottomZInner, innerPoints[i].y);
+      positions.push(outerPoints[i].x, topZOuter, outerPoints[i].y);
+      positions.push(innerPoints[i].x, topZInner, innerPoints[i].y);
     }
 
     for (let i = 0; i < n - 1; i++) {
-      const curr = i * 4
-      const next = (i + 1) * 4
+      const curr = i * 4;
+      const next = (i + 1) * 4;
 
-      indices.push(curr + 0, next + 0, curr + 2)
-      indices.push(next + 0, next + 2, curr + 2)
-      indices.push(curr + 1, curr + 3, next + 1)
-      indices.push(next + 1, curr + 3, next + 3)
-      indices.push(curr + 0, curr + 1, next + 0)
-      indices.push(next + 0, curr + 1, next + 1)
-      indices.push(curr + 2, next + 2, curr + 3)
-      indices.push(next + 2, next + 3, curr + 3)
+      indices.push(curr + 0, next + 0, curr + 2);
+      indices.push(next + 0, next + 2, curr + 2);
+      indices.push(curr + 1, curr + 3, next + 1);
+      indices.push(next + 1, curr + 3, next + 3);
+      indices.push(curr + 0, curr + 1, next + 0);
+      indices.push(next + 0, curr + 1, next + 1);
+      indices.push(curr + 2, next + 2, curr + 3);
+      indices.push(next + 2, next + 3, curr + 3);
     }
 
-    const geo = new THREE.BufferGeometry()
-    geo.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3))
-    geo.setIndex(indices)
-    geo.computeVertexNormals()
-    return geo
-  }, [innerWidth, innerHeight, outerWidth, outerHeight, cornerRadius, mainLength, topCut, bottomCut])
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute(
+      "position",
+      new THREE.Float32BufferAttribute(positions, 3),
+    );
+    geo.setIndex(indices);
+    geo.computeVertexNormals();
+    return geo;
+  }, [
+    innerWidth,
+    innerHeight,
+    outerWidth,
+    outerHeight,
+    cornerRadius,
+    mainLength,
+    topCut,
+    bottomCut,
+  ]);
 
   const flareGeometry = useMemo(() => {
-    if (!useFlare) return null
+    if (!useFlare) return null;
 
-    const flareW = flare.width + flare.clearance * 2
-    const flareH = (isSquare ? flare.width : flare.height) + flare.clearance * 2
+    const flareW = flare.width + flare.clearance * 2;
+    const flareH =
+      (isSquare ? flare.width : flare.height) + flare.clearance * 2;
 
-    const outerShape = createRoundedRectShape(outerWidth, outerHeight, cornerRadius)
-    const flareOuter = createRoundedRectShape(flareW, flareH, cornerRadius)
-    const innerShape = createRoundedRectShape(innerWidth, innerHeight, cornerRadius)
+    const outerShape = createRoundedRectShape(
+      outerWidth,
+      outerHeight,
+      cornerRadius,
+    );
+    const flareOuter = createRoundedRectShape(flareW, flareH, cornerRadius);
+    const innerShape = createRoundedRectShape(
+      innerWidth,
+      innerHeight,
+      cornerRadius,
+    );
 
-    const segments = 32
-    const outerPoints = outerShape.getPoints(segments)
-    const flarePoints = flareOuter.getPoints(segments)
-    const innerPoints = innerShape.getPoints(segments)
-    const n = outerPoints.length
+    const segments = 32;
+    const outerPoints = outerShape.getPoints(segments);
+    const flarePoints = flareOuter.getPoints(segments);
+    const innerPoints = innerShape.getPoints(segments);
+    const n = outerPoints.length;
 
-    const positions: number[] = []
-    const indices: number[] = []
+    const positions: number[] = [];
+    const indices: number[] = [];
 
     for (let i = 0; i < n; i++) {
-      positions.push(outerPoints[i].x, 0, outerPoints[i].y)
-      positions.push(innerPoints[i].x, 0, innerPoints[i].y)
-      positions.push(flarePoints[i].x, flare.length, flarePoints[i].y)
-      positions.push(innerPoints[i].x, flare.length, innerPoints[i].y)
+      positions.push(outerPoints[i].x, 0, outerPoints[i].y);
+      positions.push(innerPoints[i].x, 0, innerPoints[i].y);
+      positions.push(flarePoints[i].x, flare.length, flarePoints[i].y);
+      positions.push(innerPoints[i].x, flare.length, innerPoints[i].y);
     }
 
     for (let i = 0; i < n - 1; i++) {
-      const curr = i * 4
-      const next = (i + 1) * 4
+      const curr = i * 4;
+      const next = (i + 1) * 4;
 
-      indices.push(curr, next, curr + 2)
-      indices.push(next, next + 2, curr + 2)
-      indices.push(curr + 1, curr + 3, next + 1)
-      indices.push(next + 1, curr + 3, next + 3)
-      indices.push(curr + 2, next + 2, curr + 3)
-      indices.push(next + 2, next + 3, curr + 3)
+      indices.push(curr, next, curr + 2);
+      indices.push(next, next + 2, curr + 2);
+      indices.push(curr + 1, curr + 3, next + 1);
+      indices.push(next + 1, curr + 3, next + 3);
+      indices.push(curr + 2, next + 2, curr + 3);
+      indices.push(next + 2, next + 3, curr + 3);
     }
 
-    const geo = new THREE.BufferGeometry()
-    geo.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3))
-    geo.setIndex(indices)
-    geo.computeVertexNormals()
-    return geo
-  }, [flare, outerWidth, outerHeight, innerWidth, innerHeight, cornerRadius, isSquare, useFlare])
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute(
+      "position",
+      new THREE.Float32BufferAttribute(positions, 3),
+    );
+    geo.setIndex(indices);
+    geo.computeVertexNormals();
+    return geo;
+  }, [
+    flare,
+    outerWidth,
+    outerHeight,
+    innerWidth,
+    innerHeight,
+    cornerRadius,
+    isSquare,
+    useFlare,
+  ]);
 
   return (
     <group position={[0, 0, 0]}>
@@ -791,14 +952,14 @@ function RectangularTubeMesh({ config }: { config: TubeConfig & { shape: "square
         </mesh>
       )}
     </group>
-  )
+  );
 }
 
 function TubeMesh({ config }: { config: TubeConfig }) {
   if (config.shape === "round") {
-    return <RoundTubeMesh config={config} />
+    return <RoundTubeMesh config={config} />;
   }
-  return <RectangularTubeMesh config={config} />
+  return <RectangularTubeMesh config={config} />;
 }
 
 export function TubePreview({ config }: TubePreviewProps) {
@@ -809,19 +970,25 @@ export function TubePreview({ config }: TubePreviewProps) {
       : config.shape === "square"
         ? config.outerSize
         : Math.max(config.outerWidth, config.outerHeight),
-  )
+  );
 
-  const cameraDistance = maxDimension * 2.5
+  const cameraDistance = maxDimension * 2.5;
 
   return (
     <Canvas
       camera={{
-        position: [cameraDistance * 0.6, cameraDistance * 0.4, cameraDistance * 0.6],
+        position: [
+          cameraDistance * 0.6,
+          cameraDistance * 0.4,
+          cameraDistance * 0.6,
+        ],
         fov: 45,
         near: 0.1,
         far: maxDimension * 20,
       }}
-      style={{ background: "linear-gradient(180deg, #e2e8f0 0%, #94a3b8 100%)" }}
+      style={{
+        background: "linear-gradient(180deg, #e2e8f0 0%, #94a3b8 100%)",
+      }}
     >
       <Environment preset="studio" />
 
@@ -837,7 +1004,13 @@ export function TubePreview({ config }: TubePreviewProps) {
 
       <GridFloor size={maxDimension} />
 
-      <ContactShadows position={[0, -0.01, 0]} opacity={0.4} scale={maxDimension * 2} blur={2} far={maxDimension} />
+      <ContactShadows
+        position={[0, -0.01, 0]}
+        opacity={0.4}
+        scale={maxDimension * 2}
+        blur={2}
+        far={maxDimension}
+      />
 
       <OrbitControls
         makeDefault
@@ -850,5 +1023,5 @@ export function TubePreview({ config }: TubePreviewProps) {
         <GizmoViewport labelColor="white" axisHeadScale={1} />
       </GizmoHelper>
     </Canvas>
-  )
+  );
 }
