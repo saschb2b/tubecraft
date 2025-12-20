@@ -3,7 +3,7 @@
 <p align="center">
   <strong>A powerful 3D tube generator for makers and engineers</strong>
   <br />
-  Design custom tubes, pipes, and connectors for 3D printing with real-time preview
+  Design custom tubes, pipes, adapters, and connectors for 3D printing with real-time preview
 </p>
 
 <p align="center">
@@ -22,32 +22,59 @@
 
 ## Features
 
-### 🎯 Multiple Tube Shapes
+### Tube Generator
+
+#### Multiple Tube Shapes
 - **Round/Circular** - Standard pipe profiles
 - **Square** - Perfect for downspouts and ducts  
 - **Rectangular** - Custom aspect ratios for any application
 
-### ✂️ Advanced End Operations
+#### Advanced End Operations
 Control top and bottom ends independently:
 - **Flat** - Standard straight cut
 - **Miter** - Angled cuts (0-60°) for corner joints
 - **Chamfer** - Beveled edges for easier insertion
 - **Saddle** - Curved fish-mouth cuts for T-joints and branch connections
 
-### 🔗 Professional Press-Fit System
+#### Professional Press-Fit System
 - **Fit Type Presets** - Loose (0.3mm) / Snug (0.15mm) / Interference (-0.05mm)
 - **Custom Clearance** - Fine-tune tolerances for your printer
 - **Lead-in Chamfer** - Auto-generated tapers for easier assembly
 - **Stop Shoulder** - Internal step for consistent seating depth
 - **Anti-Rotation** - Add flats or keys to prevent spinning
 
-### 🎨 Real-Time 3D Preview
+---
+
+### Adapter Generator
+
+Build custom connectors like LEGO pieces to join any tubes together.
+
+#### Shape Transitions
+- **Round to Round** - Reducers and expanders
+- **Round to Square** - Gutter to downspout connections
+- **Square to Rectangular** - Downspout transitions
+- **Any combination** - Mix and match as needed
+
+#### Bend Angles
+- **Straight adapters** (0°) - Simple transitions
+- **Elbows** (up to 90°) - Corners and offsets
+- Real-time bend preview
+
+#### Press-Fit Ends
+- **Male fitting** - Inserts into another tube
+- **Female fitting** - Receives another tube
+- **Configurable clearance** - Adjust for your printer
+- Independent settings for each end
+
+---
+
+### Real-Time 3D Preview
 - Professional CAD-style metallic rendering
 - Interactive dimension indicators
 - Grid floor with axis visualization
 - Orbit controls (drag to rotate, scroll to zoom)
 
-### 📦 STL Export
+### STL Export
 - Watertight mesh generation (no open edges)
 - Compatible with all major slicers
 - Optimized for 3D printing
@@ -61,6 +88,7 @@ Control top and bottom ends independently:
 - **T-Joint Connections** - Saddle cuts for branch fittings on half-round gutters
 - **Custom Ducting** - Air flow, cable management, vacuum systems
 - **Modular Assemblies** - Print multiple pieces that snap together
+- **Shape Transitions** - Round to square, different sizes, angled connections
 
 ---
 
@@ -74,16 +102,17 @@ git clone https://github.com/saschb2b/tubecraft.git
 cd tubecraft
 
 # Install dependencies
-pnpm install
+npm install
 
 # Run development server
-pnpm run dev
+npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ### Usage
 
+#### Tube Generator
 1. **Select Shape** - Choose round, square, or rectangular
 2. **Set Dimensions** - Configure inner/outer sizes, wall thickness, length
 3. **Configure Ends** - Add miters, chamfers, or saddle cuts as needed
@@ -91,14 +120,22 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 5. **Preview** - Rotate and inspect your design in 3D
 6. **Download STL** - Export for immediate 3D printing
 
+#### Adapter Generator
+1. **Switch to Adapters tab**
+2. **Configure End A** - Set shape and dimensions for the bottom end
+3. **Configure End B** - Set shape and dimensions for the top end
+4. **Set Transition** - Adjust length and bend angle
+5. **Add Press-Fit** - Optional male/female fittings on either end
+6. **Download STL** - Export for printing
+
 ---
 
 ## Tech Stack
 
-- **Next.js 14** - React framework with App Router
+- **Next.js 15** - React framework with App Router
 - **React Three Fiber** - 3D rendering with Three.js
 - **TypeScript** - Type-safe development
-- **Tailwind CSS** - Utility-first styling
+- **Tailwind CSS v4** - Utility-first styling
 - **shadcn/ui** - Beautiful UI components
 
 ---
@@ -131,15 +168,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-## Acknowledgments
-
-Built with passion for the maker community. Special thanks to all contributors and users who provide feedback and feature requests.
-
----
-
 <p align="center">
-  Made with ❤️ by the open source community
+  Made with care by the open source community
 </p>
-```
-
-```tsx file="" isHidden

@@ -4,9 +4,14 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { TubePreview } from "@/components/tube-preview";
 import { TubeControls } from "@/components/tube-controls";
+import { AdapterPreview } from "@/components/adapter-preview";
+import { AdapterControls } from "@/components/adapter-controls";
 import { downloadSTL } from "@/lib/stl-generator";
+import { downloadAdapterSTL } from "@/lib/adapter-generator";
 import type { TubeConfig } from "@/lib/tube-types";
+import type { AdapterConfig } from "@/lib/adapter-types";
 import { DEFAULT_ROUND_CONFIG } from "@/lib/tube-types";
+import { DEFAULT_ADAPTER_CONFIG } from "@/lib/adapter-types";
 import {
   Download,
   RotateCcw,
@@ -15,6 +20,7 @@ import {
   Heart,
   ExternalLink,
   Github,
+  Link2,
 } from "lucide-react";
 import {
   Dialog,
@@ -23,42 +29,60 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { getEffectiveBendRadius } from "@/lib/adapter-types";
+
+type TabType = "tube" | "adapter";
 
 export default function Home() {
-  const [config, setConfig] = useState<TubeConfig>(DEFAULT_ROUND_CONFIG);
+  const [activeTab, setActiveTab] = useState<TabType>("tube");
+  const [tubeConfig, setTubeConfig] =
+    useState<TubeConfig>(DEFAULT_ROUND_CONFIG);
+  const [adapterConfig, setAdapterConfig] = useState<AdapterConfig>(
+    DEFAULT_ADAPTER_CONFIG,
+  );
   const [showThankYou, setShowThankYou] = useState(false);
 
   const handleDownload = () => {
-    const shapeName = config.shape;
-    const filename = `tube-${shapeName}-${config.length}mm.stl`;
-    downloadSTL(config, filename);
+    if (activeTab === "tube") {
+      const shapeName = tubeConfig.shape;
+      const filename = `tube-${shapeName}-${tubeConfig.length}mm.stl`;
+      downloadSTL(tubeConfig, filename);
+    } else {
+      const bendRadius = getEffectiveBendRadius(adapterConfig);
+      const filename = `adapter-${adapterConfig.endA.shape}-to-${adapterConfig.endB.shape}-${adapterConfig.bendAngle}deg.stl`;
+      downloadAdapterSTL(adapterConfig, filename);
+    }
     setShowThankYou(true);
   };
 
   const handleReset = () => {
-    setConfig(DEFAULT_ROUND_CONFIG);
+    if (activeTab === "tube") {
+      setTubeConfig(DEFAULT_ROUND_CONFIG);
+    } else {
+      setAdapterConfig(DEFAULT_ADAPTER_CONFIG);
+    }
   };
 
-  const getBadges = () => {
+  const getTubeBadges = () => {
     const badges: { label: string; color: string }[] = [];
 
-    if (config.flare.enabled && config.topCut.type === "flat") {
+    if (tubeConfig.flare.enabled && tubeConfig.topCut.type === "flat") {
       badges.push({
-        label: `Press-Fit (${config.flare.fitType})`,
+        label: `Press-Fit (${tubeConfig.flare.fitType})`,
         color: "bg-pink-500/10 text-pink-500",
       });
     }
 
-    if (config.topCut.type !== "flat") {
+    if (tubeConfig.topCut.type !== "flat") {
       badges.push({
-        label: `Top: ${config.topCut.type}`,
+        label: `Top: ${tubeConfig.topCut.type}`,
         color: "bg-purple-500/10 text-purple-500",
       });
     }
 
-    if (config.bottomCut.type !== "flat") {
+    if (tubeConfig.bottomCut.type !== "flat") {
       badges.push({
-        label: `Bottom: ${config.bottomCut.type}`,
+        label: `Bottom: ${tubeConfig.bottomCut.type}`,
         color: "bg-orange-500/10 text-orange-500",
       });
     }
@@ -66,7 +90,32 @@ export default function Home() {
     return badges;
   };
 
-  const badges = getBadges();
+  const getAdapterBadges = () => {
+    const badges: { label: string; color: string }[] = [];
+
+    if (adapterConfig.endA.shape !== adapterConfig.endB.shape) {
+      badges.push({
+        label: `${adapterConfig.endA.shape} → ${adapterConfig.endB.shape}`,
+        color: "bg-blue-500/10 text-blue-500",
+      });
+    }
+
+    if (adapterConfig.bendAngle > 0) {
+      badges.push({
+        label: `${adapterConfig.bendAngle}° elbow`,
+        color: "bg-purple-500/10 text-purple-500",
+      });
+    } else {
+      badges.push({
+        label: "Straight coupling",
+        color: "bg-green-500/10 text-green-500",
+      });
+    }
+
+    return badges;
+  };
+
+  const badges = activeTab === "tube" ? getTubeBadges() : getAdapterBadges();
 
   return (
     <div className="flex min-h-screen flex-col lg:flex-row">
@@ -85,9 +134,42 @@ export default function Home() {
           </div>
         </div>
 
+        {/* Tab Navigation */}
+        <div className="flex border-b border-border">
+          <button
+            onClick={() => setActiveTab("tube")}
+            className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-colors ${
+              activeTab === "tube"
+                ? "bg-muted text-foreground border-b-2 border-primary"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+            }`}
+          >
+            <Box className="h-4 w-4" />
+            Tubes
+          </button>
+          <button
+            onClick={() => setActiveTab("adapter")}
+            className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-colors ${
+              activeTab === "adapter"
+                ? "bg-muted text-foreground border-b-2 border-primary"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+            }`}
+          >
+            <Link2 className="h-4 w-4" />
+            Adapters
+          </button>
+        </div>
+
         {/* Controls */}
         <div className="flex-1 overflow-y-auto p-4">
-          <TubeControls config={config} onChange={setConfig} />
+          {activeTab === "tube" ? (
+            <TubeControls config={tubeConfig} onChange={setTubeConfig} />
+          ) : (
+            <AdapterControls
+              config={adapterConfig}
+              onChange={setAdapterConfig}
+            />
+          )}
         </div>
 
         {/* Actions */}
@@ -113,18 +195,45 @@ export default function Home() {
         {/* Info Bar */}
         <div className="flex items-center justify-between border-b border-border bg-card/50 px-4 py-2">
           <div className="flex items-center gap-3 text-sm flex-wrap">
-            <span className="text-muted-foreground">
-              Shape:{" "}
-              <span className="text-foreground font-medium capitalize">
-                {config.shape}
-              </span>
-            </span>
-            <span className="text-muted-foreground">
-              Length:{" "}
-              <span className="text-foreground font-medium">
-                {config.length}mm
-              </span>
-            </span>
+            {activeTab === "tube" ? (
+              <>
+                <span className="text-muted-foreground">
+                  Shape:{" "}
+                  <span className="text-foreground font-medium capitalize">
+                    {tubeConfig.shape}
+                  </span>
+                </span>
+                <span className="text-muted-foreground">
+                  Length:{" "}
+                  <span className="text-foreground font-medium">
+                    {tubeConfig.length}mm
+                  </span>
+                </span>
+              </>
+            ) : (
+              <>
+                <span className="text-muted-foreground">
+                  Type:{" "}
+                  <span className="text-foreground font-medium capitalize">
+                    {adapterConfig.endA.shape} to {adapterConfig.endB.shape}
+                  </span>
+                </span>
+                <span className="text-muted-foreground">
+                  Socket:{" "}
+                  <span className="text-foreground font-medium">
+                    {adapterConfig.socketDepth}mm
+                  </span>
+                </span>
+                {adapterConfig.bendAngle > 0 && (
+                  <span className="text-muted-foreground">
+                    Bend:{" "}
+                    <span className="text-foreground font-medium">
+                      {adapterConfig.bendAngle}°
+                    </span>
+                  </span>
+                )}
+              </>
+            )}
             {badges.map((badge, i) => (
               <span
                 key={i}
@@ -141,7 +250,11 @@ export default function Home() {
 
         {/* 3D Preview */}
         <div className="flex-1 relative">
-          <TubePreview config={config} />
+          {activeTab === "tube" ? (
+            <TubePreview config={tubeConfig} />
+          ) : (
+            <AdapterPreview config={adapterConfig} />
+          )}
         </div>
 
         <footer className="border-t border-border bg-card/30 backdrop-blur-sm px-4 py-3">
