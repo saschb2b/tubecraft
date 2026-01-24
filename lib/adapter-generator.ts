@@ -229,7 +229,7 @@ export function generateAdapterSTL(config: AdapterConfig): ArrayBuffer {
   const { endA, endB, wallThickness, socketDepth, socketClearance, bendAngle } =
     config;
   const bendRadius = getEffectiveBendRadius(config);
-  const segments = 64;
+  const segments = config.segmentAmount;
 
   const straightLength = bendAngle === 0 ? bendRadius : 0;
 

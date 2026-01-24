@@ -247,6 +247,7 @@ function TubeEndControls({
 export function AdapterControls({ config, onChange }: AdapterControlsProps) {
   const [adapterOpen, setAdapterOpen] = useState(true);
   const [bendOpen, setBendOpen] = useState(true);
+  const [segmentOpen, setSegmentOpen] = useState(false);
 
   return (
     <div className="space-y-1">
@@ -402,6 +403,38 @@ export function AdapterControls({ config, onChange }: AdapterControlsProps) {
             </div>
             <p className="text-xs text-muted-foreground">
               Leave at 0 to auto-calculate based on tube size
+            </p>
+          </div>
+        </CollapsibleContent>
+      </Collapsible>
+      <Separator />
+
+      <Collapsible open={segmentOpen} onOpenChange={setSegmentOpen}>
+        <CollapsibleTrigger className="flex w-full items-center justify-between py-2 text-sm font-medium hover:text-foreground text-foreground/80 transition-colors">
+          Segments
+          <ChevronDown
+            className={`h-4 w-4 transition-transform ${segmentOpen ? "rotate-180" : ""}`}
+          />
+        </CollapsibleTrigger>
+        <CollapsibleContent className="space-y-4 pb-4">
+          <div className="space-y-1.5">
+            <Label className="text-xs text-muted-foreground">Amount of Segments</Label>
+            <div className="relative">
+              <Input
+                type="number"
+                value={config.segmentAmount}
+                onChange={(e) =>
+                  onChange({ ...config, segmentAmount: Number(e.target.value) })
+                }
+                className="bg-muted/50 border-0 pr-6"
+                min={4}
+              />
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
+                °
+              </span>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Amount of Segments in a circle that the exported STL will have. Increasing this will increase the circular resolution at the expense of file size.
             </p>
           </div>
         </CollapsibleContent>
