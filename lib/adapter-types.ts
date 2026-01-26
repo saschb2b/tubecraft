@@ -34,6 +34,8 @@ export interface AdapterConfig {
   // Elbow settings
   bendAngle: number; // 0 = straight coupling, 45 = 45° elbow, 90 = 90° elbow
   bendRadius: number; // Center-line radius of the bend (0 = auto-calculate)
+
+  segmentAmount: number;
 }
 
 // Default configurations
@@ -63,6 +65,7 @@ export const DEFAULT_ADAPTER_CONFIG: AdapterConfig = {
   socketClearance: 0.2,
   bendAngle: 0, // Default to straight coupling (0°) since bends are less common
   bendRadius: 0,
+  segmentAmount: 64,
 };
 
 // Helper functions
