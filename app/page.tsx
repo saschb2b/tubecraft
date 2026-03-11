@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
@@ -35,7 +36,27 @@ import GitHubIcon from "@mui/icons-material/GitHub";
 type TabType = "tube" | "adapter";
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState<TabType>("tube");
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const tabParam = searchParams.get("tab");
+  const initialTab: TabType =
+    tabParam === "adapter" ? "adapter" : "tube";
+  const [activeTab, setActiveTab] = useState<TabType>(initialTab);
+
+  const handleTabChange = useCallback(
+    (tab: TabType) => {
+      setActiveTab(tab);
+      const params = new URLSearchParams(searchParams.toString());
+      if (tab === "tube") {
+        params.delete("tab");
+      } else {
+        params.set("tab", tab);
+      }
+      const query = params.toString();
+      router.replace(query ? `?${query}` : "/", { scroll: false });
+    },
+    [searchParams, router],
+  );
   const [tubeConfig, setTubeConfig] =
     useState<TubeConfig>(DEFAULT_ROUND_CONFIG);
   const [adapterConfig, setAdapterConfig] = useState<AdapterConfig>(
@@ -178,7 +199,7 @@ export default function Home() {
         {/* Tab Navigation */}
         <Tabs
           value={activeTab}
-          onChange={(_, v: TabType) => setActiveTab(v)}
+          onChange={(_, v: TabType) => handleTabChange(v)}
           variant="fullWidth"
           sx={{
             borderBottom: 1,
