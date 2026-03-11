@@ -6,14 +6,18 @@ const theme = createTheme({
   palette: {
     mode: "dark",
     primary: {
-      main: "#34d399",
-      contrastText: "#1a1b2e",
+      main: "#3c6e71",
+      contrastText: "#ffffff",
     },
     background: {
-      default: "#1a1b2e",
-      paper: "#242538",
+      default: "#353535",
+      paper: "#3e3e3e",
     },
-    divider: "#3b3c58",
+    text: {
+      primary: "#ffffff",
+      secondary: "#d9d9d9",
+    },
+    divider: "#4a4a4a",
   },
   components: {
     MuiAccordion: {
