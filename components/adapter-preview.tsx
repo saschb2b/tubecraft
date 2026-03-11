@@ -703,6 +703,7 @@ export function AdapterPreview({ config }: { config: AdapterConfig }) {
       />
 
       <OrbitControls
+        makeDefault
         target={[0, centerY, config.bendAngle > 0 ? bendRadius / 4 : 0]}
         enableDamping
         dampingFactor={0.05}
