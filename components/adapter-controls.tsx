@@ -15,9 +15,6 @@ import type {
   AdapterConfig,
   TubeSpec,
   AdapterEndShape,
-  RoundTubeSpec,
-  SquareTubeSpec,
-  RectangularTubeSpec,
 } from "@/lib/adapter-types";
 import {
   DEFAULT_ROUND_TUBE,
@@ -111,7 +108,9 @@ function TubeEndControls({
             select
             label="Tube Shape"
             value={tube.shape}
-            onChange={(e) => handleShapeChange(e.target.value as AdapterEndShape)}
+            onChange={(e) =>
+              handleShapeChange(e.target.value as AdapterEndShape)
+            }
             fullWidth
           >
             <MenuItem value="round">Round / Circular</MenuItem>
@@ -127,10 +126,8 @@ function TubeEndControls({
           {tube.shape === "round" && (
             <NumberField
               label="Tube Outer Diameter"
-              value={(tube as RoundTubeSpec).outerDiameter}
-              onChange={(v) =>
-                onChange({ ...tube, outerDiameter: v } as RoundTubeSpec)
-              }
+              value={tube.outerDiameter}
+              onChange={(v) => onChange({ ...tube, outerDiameter: v })}
               min={1}
             />
           )}
@@ -139,18 +136,14 @@ function TubeEndControls({
             <>
               <NumberField
                 label="Tube Outer Size"
-                value={(tube as SquareTubeSpec).outerSize}
-                onChange={(v) =>
-                  onChange({ ...tube, outerSize: v } as SquareTubeSpec)
-                }
+                value={tube.outerSize}
+                onChange={(v) => onChange({ ...tube, outerSize: v })}
                 min={1}
               />
               <NumberField
                 label="Corner Radius"
-                value={(tube as SquareTubeSpec).cornerRadius}
-                onChange={(v) =>
-                  onChange({ ...tube, cornerRadius: v } as SquareTubeSpec)
-                }
+                value={tube.cornerRadius}
+                onChange={(v) => onChange({ ...tube, cornerRadius: v })}
                 min={0}
               />
             </>
@@ -158,30 +151,30 @@ function TubeEndControls({
 
           {tube.shape === "rectangular" && (
             <>
-              <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1.5 }}>
+              <Box
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: 1.5,
+                }}
+              >
                 <NumberField
                   label="Tube Outer Width"
-                  value={(tube as RectangularTubeSpec).outerWidth}
-                  onChange={(v) =>
-                    onChange({ ...tube, outerWidth: v } as RectangularTubeSpec)
-                  }
+                  value={tube.outerWidth}
+                  onChange={(v) => onChange({ ...tube, outerWidth: v })}
                   min={1}
                 />
                 <NumberField
                   label="Tube Outer Height"
-                  value={(tube as RectangularTubeSpec).outerHeight}
-                  onChange={(v) =>
-                    onChange({ ...tube, outerHeight: v } as RectangularTubeSpec)
-                  }
+                  value={tube.outerHeight}
+                  onChange={(v) => onChange({ ...tube, outerHeight: v })}
                   min={1}
                 />
               </Box>
               <NumberField
                 label="Corner Radius"
-                value={(tube as RectangularTubeSpec).cornerRadius}
-                onChange={(v) =>
-                  onChange({ ...tube, cornerRadius: v } as RectangularTubeSpec)
-                }
+                value={tube.cornerRadius}
+                onChange={(v) => onChange({ ...tube, cornerRadius: v })}
                 min={0}
               />
             </>
@@ -222,31 +215,27 @@ export function AdapterControls({ config, onChange }: AdapterControlsProps) {
         </AccordionSummary>
         <AccordionDetails>
           <Stack spacing={2}>
-            <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1.5 }}>
+            <Box
+              sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1.5 }}
+            >
               <NumberField
                 label="Wall Thickness"
                 value={config.wallThickness}
-                onChange={(v) =>
-                  onChange({ ...config, wallThickness: v })
-                }
+                onChange={(v) => onChange({ ...config, wallThickness: v })}
                 min={1}
                 step={0.5}
               />
               <NumberField
                 label="Socket Depth"
                 value={config.socketDepth}
-                onChange={(v) =>
-                  onChange({ ...config, socketDepth: v })
-                }
+                onChange={(v) => onChange({ ...config, socketDepth: v })}
                 min={5}
               />
             </Box>
             <NumberField
               label="Socket Clearance (fit tolerance)"
               value={config.socketClearance}
-              onChange={(v) =>
-                onChange({ ...config, socketClearance: v })
-              }
+              onChange={(v) => onChange({ ...config, socketClearance: v })}
               min={0}
               step={0.05}
             />
@@ -271,9 +260,7 @@ export function AdapterControls({ config, onChange }: AdapterControlsProps) {
             <NumberField
               label="Bend Angle"
               value={config.bendAngle}
-              onChange={(v) =>
-                onChange({ ...config, bendAngle: v })
-              }
+              onChange={(v) => onChange({ ...config, bendAngle: v })}
               min={0}
               max={180}
               unit="°"
@@ -284,9 +271,7 @@ export function AdapterControls({ config, onChange }: AdapterControlsProps) {
             <NumberField
               label="Bend Radius (0 = auto)"
               value={config.bendRadius}
-              onChange={(v) =>
-                onChange({ ...config, bendRadius: v })
-              }
+              onChange={(v) => onChange({ ...config, bendRadius: v })}
               min={0}
             />
             <Typography variant="caption" color="text.secondary">
@@ -309,9 +294,7 @@ export function AdapterControls({ config, onChange }: AdapterControlsProps) {
             <NumberField
               label="Amount of Segments"
               value={config.segmentAmount}
-              onChange={(v) =>
-                onChange({ ...config, segmentAmount: v })
-              }
+              onChange={(v) => onChange({ ...config, segmentAmount: v })}
               min={4}
               unit=""
             />

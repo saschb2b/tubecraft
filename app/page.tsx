@@ -10,9 +10,7 @@ import Chip from "@mui/material/Chip";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
-import Divider from "@mui/material/Divider";
 import Stack from "@mui/material/Stack";
-import IconButton from "@mui/material/IconButton";
 import { TubePreview } from "@/components/tube-preview";
 import { TubeControls } from "@/components/tube-controls";
 import { AdapterPreview } from "@/components/adapter-preview";
@@ -30,10 +28,9 @@ import {
   Coffee,
   Heart,
   ExternalLink,
-  Github,
   Link2,
 } from "lucide-react";
-import { getEffectiveBendRadius } from "@/lib/adapter-types";
+import GitHubIcon from "@mui/icons-material/GitHub";
 
 type TabType = "tube" | "adapter";
 
@@ -49,10 +46,10 @@ export default function Home() {
   const handleDownload = () => {
     if (activeTab === "tube") {
       const shapeName = tubeConfig.shape;
-      const filename = `tube-${shapeName}-${tubeConfig.length}mm.stl`;
+      const filename = `tube-${shapeName}-${String(tubeConfig.length)}mm.stl`;
       downloadSTL(tubeConfig, filename);
     } else {
-      const filename = `adapter-${adapterConfig.endA.shape}-to-${adapterConfig.endB.shape}-${adapterConfig.bendAngle}deg.stl`;
+      const filename = `adapter-${adapterConfig.endA.shape}-to-${adapterConfig.endB.shape}-${String(adapterConfig.bendAngle)}deg.stl`;
       downloadAdapterSTL(adapterConfig, filename);
     }
     setShowThankYou(true);
@@ -105,7 +102,7 @@ export default function Home() {
 
     if (adapterConfig.bendAngle > 0) {
       badges.push({
-        label: `${adapterConfig.bendAngle}° elbow`,
+        label: `${String(adapterConfig.bendAngle)}° elbow`,
         color: "#a855f7",
       });
     } else {
@@ -121,7 +118,13 @@ export default function Home() {
   const badges = activeTab === "tube" ? getTubeBadges() : getAdapterBadges();
 
   return (
-    <Box sx={{ display: "flex", minHeight: "100vh", flexDirection: { xs: "column", lg: "row" } }}>
+    <Box
+      sx={{
+        display: "flex",
+        minHeight: "100vh",
+        flexDirection: { xs: "column", lg: "row" },
+      }}
+    >
       {/* Sidebar Controls */}
       <Box
         component="aside"
@@ -136,7 +139,16 @@ export default function Home() {
         }}
       >
         {/* Header */}
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, p: 2, borderBottom: 1, borderColor: "divider" }}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1.5,
+            p: 2,
+            borderBottom: 1,
+            borderColor: "divider",
+          }}
+        >
           <Box
             sx={{
               display: "flex",
@@ -163,12 +175,22 @@ export default function Home() {
         {/* Tab Navigation */}
         <Tabs
           value={activeTab}
-          onChange={(_, v) => setActiveTab(v)}
+          onChange={(_, v: TabType) => setActiveTab(v)}
           variant="fullWidth"
           sx={{ borderBottom: 1, borderColor: "divider" }}
         >
-          <Tab icon={<BoxIcon size={16} />} iconPosition="start" label="Tubes" value="tube" />
-          <Tab icon={<Link2 size={16} />} iconPosition="start" label="Adapters" value="adapter" />
+          <Tab
+            icon={<BoxIcon size={16} />}
+            iconPosition="start"
+            label="Tubes"
+            value="tube"
+          />
+          <Tab
+            icon={<Link2 size={16} />}
+            iconPosition="start"
+            label="Adapters"
+            value="adapter"
+          />
         </Tabs>
 
         {/* Controls */}
@@ -209,7 +231,15 @@ export default function Home() {
       </Box>
 
       {/* Preview Area */}
-      <Box component="main" sx={{ flex: 1, display: "flex", flexDirection: "column", minHeight: { xs: "50vh", lg: 0 } }}>
+      <Box
+        component="main"
+        sx={{
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          minHeight: { xs: "50vh", lg: 0 },
+        }}
+      >
         {/* Info Bar */}
         <Box
           sx={{
@@ -223,18 +253,35 @@ export default function Home() {
             py: 1,
           }}
         >
-          <Stack direction="row" spacing={1.5} alignItems="center" flexWrap="wrap" useFlexGap>
+          <Stack
+            direction="row"
+            spacing={1.5}
+            alignItems="center"
+            flexWrap="wrap"
+            useFlexGap
+          >
             {activeTab === "tube" ? (
               <>
                 <Typography variant="body2" color="text.secondary">
                   Shape:{" "}
-                  <Typography component="span" variant="body2" fontWeight={500} color="text.primary" sx={{ textTransform: "capitalize" }}>
+                  <Typography
+                    component="span"
+                    variant="body2"
+                    fontWeight={500}
+                    color="text.primary"
+                    sx={{ textTransform: "capitalize" }}
+                  >
                     {tubeConfig.shape}
                   </Typography>
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
                   Length:{" "}
-                  <Typography component="span" variant="body2" fontWeight={500} color="text.primary">
+                  <Typography
+                    component="span"
+                    variant="body2"
+                    fontWeight={500}
+                    color="text.primary"
+                  >
                     {tubeConfig.length}mm
                   </Typography>
                 </Typography>
@@ -243,20 +290,36 @@ export default function Home() {
               <>
                 <Typography variant="body2" color="text.secondary">
                   Type:{" "}
-                  <Typography component="span" variant="body2" fontWeight={500} color="text.primary" sx={{ textTransform: "capitalize" }}>
+                  <Typography
+                    component="span"
+                    variant="body2"
+                    fontWeight={500}
+                    color="text.primary"
+                    sx={{ textTransform: "capitalize" }}
+                  >
                     {adapterConfig.endA.shape} to {adapterConfig.endB.shape}
                   </Typography>
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
                   Socket:{" "}
-                  <Typography component="span" variant="body2" fontWeight={500} color="text.primary">
+                  <Typography
+                    component="span"
+                    variant="body2"
+                    fontWeight={500}
+                    color="text.primary"
+                  >
                     {adapterConfig.socketDepth}mm
                   </Typography>
                 </Typography>
                 {adapterConfig.bendAngle > 0 && (
                   <Typography variant="body2" color="text.secondary">
                     Bend:{" "}
-                    <Typography component="span" variant="body2" fontWeight={500} color="text.primary">
+                    <Typography
+                      component="span"
+                      variant="body2"
+                      fontWeight={500}
+                      color="text.primary"
+                    >
                       {adapterConfig.bendAngle}&deg;
                     </Typography>
                   </Typography>
@@ -306,7 +369,14 @@ export default function Home() {
             py: 1.5,
           }}
         >
-          <Stack direction="row" justifyContent="space-between" alignItems="center" flexWrap="wrap" useFlexGap spacing={1}>
+          <Stack
+            direction="row"
+            justifyContent="space-between"
+            alignItems="center"
+            flexWrap="wrap"
+            useFlexGap
+            spacing={1}
+          >
             <Stack direction="row" spacing={1.5} alignItems="center">
               <Typography variant="body2" color="text.secondary">
                 Made with{" "}
@@ -333,8 +403,11 @@ export default function Home() {
                   transition: "color 0.2s",
                 }}
               >
-                <Github size={16} />
-                <Typography variant="body2" sx={{ display: { xs: "none", sm: "inline" } }}>
+                <GitHubIcon sx={{ fontSize: 16 }} />
+                <Typography
+                  variant="body2"
+                  sx={{ display: { xs: "none", sm: "inline" } }}
+                >
                   Open Source
                 </Typography>
               </Box>
@@ -355,7 +428,10 @@ export default function Home() {
               }}
             >
               <Coffee size={16} />
-              <Typography variant="body2" sx={{ display: { xs: "none", sm: "inline" } }}>
+              <Typography
+                variant="body2"
+                sx={{ display: { xs: "none", sm: "inline" } }}
+              >
                 Buy me a coffee
               </Typography>
               <ExternalLink size={12} />
@@ -387,7 +463,11 @@ export default function Home() {
                 p: 2.5,
               }}
             >
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ mb: 1.5 }}
+              >
                 If you find TubeCraft useful, consider supporting the project:
               </Typography>
               <Stack direction="row" spacing={1}>
@@ -398,7 +478,7 @@ export default function Home() {
                   rel="noopener noreferrer"
                   variant="outlined"
                   fullWidth
-                  startIcon={<Github size={20} />}
+                  startIcon={<GitHubIcon sx={{ fontSize: 20 }} />}
                   endIcon={<ExternalLink size={16} />}
                 >
                   Star on GitHub
@@ -421,7 +501,11 @@ export default function Home() {
                 </Button>
               </Stack>
             </Box>
-            <Typography variant="caption" color="text.secondary" textAlign="center">
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              textAlign="center"
+            >
               Your support helps keep TubeCraft free and open source
             </Typography>
           </Stack>

@@ -14,13 +14,9 @@ import AccordionDetails from "@mui/material/AccordionDetails";
 import Divider from "@mui/material/Divider";
 import Stack from "@mui/material/Stack";
 import { ExpandMore } from "@mui/icons-material";
-import { useState } from "react";
 import type {
   TubeConfig,
   TubeShape,
-  RoundTubeConfig,
-  SquareTubeConfig,
-  RectangularTubeConfig,
   CutType,
   EndCutConfig,
   FlareConfig,
@@ -100,13 +96,11 @@ function Section({
 }
 
 function EndCutControls({
-  label,
   cutConfig,
   onChange,
   outerSize,
   disabled = false,
 }: {
-  label: string;
   cutConfig: EndCutConfig;
   onChange: (config: EndCutConfig) => void;
   outerSize: number;
@@ -182,7 +176,9 @@ function EndCutControls({
           <Typography variant="caption" color="text.secondary">
             Creates a curved cut to fit against another cylindrical pipe
           </Typography>
-          <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1.5 }}>
+          <Box
+            sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1.5 }}
+          >
             <NumberInput
               label="Target Pipe Diameter"
               value={cutConfig.targetDiameter}
@@ -279,18 +275,14 @@ export function TubeControls({ config, onChange }: TubeControlsProps) {
             <>
               <NumberInput
                 label="Inner Diameter"
-                value={(config as RoundTubeConfig).innerDiameter}
-                onChange={(v) =>
-                  updateConfig({ innerDiameter: v } as Partial<RoundTubeConfig>)
-                }
+                value={config.innerDiameter}
+                onChange={(v) => updateConfig({ innerDiameter: v })}
                 step={0.5}
               />
               <NumberInput
                 label="Outer Diameter"
-                value={(config as RoundTubeConfig).outerDiameter}
-                onChange={(v) =>
-                  updateConfig({ outerDiameter: v } as Partial<RoundTubeConfig>)
-                }
+                value={config.outerDiameter}
+                onChange={(v) => updateConfig({ outerDiameter: v })}
                 step={0.5}
               />
             </>
@@ -300,26 +292,20 @@ export function TubeControls({ config, onChange }: TubeControlsProps) {
             <>
               <NumberInput
                 label="Inner Size"
-                value={(config as SquareTubeConfig).innerSize}
-                onChange={(v) =>
-                  updateConfig({ innerSize: v } as Partial<SquareTubeConfig>)
-                }
+                value={config.innerSize}
+                onChange={(v) => updateConfig({ innerSize: v })}
                 step={0.5}
               />
               <NumberInput
                 label="Outer Size"
-                value={(config as SquareTubeConfig).outerSize}
-                onChange={(v) =>
-                  updateConfig({ outerSize: v } as Partial<SquareTubeConfig>)
-                }
+                value={config.outerSize}
+                onChange={(v) => updateConfig({ outerSize: v })}
                 step={0.5}
               />
               <NumberInput
                 label="Corner Radius"
-                value={(config as SquareTubeConfig).cornerRadius}
-                onChange={(v) =>
-                  updateConfig({ cornerRadius: v } as Partial<SquareTubeConfig>)
-                }
+                value={config.cornerRadius}
+                onChange={(v) => updateConfig({ cornerRadius: v })}
                 step={0.5}
               />
             </>
@@ -329,51 +315,51 @@ export function TubeControls({ config, onChange }: TubeControlsProps) {
             <>
               <NumberInput
                 label="Inner Width"
-                value={(config as RectangularTubeConfig).innerWidth}
+                value={config.innerWidth}
                 onChange={(v) =>
                   updateConfig({
                     innerWidth: v,
-                  } as Partial<RectangularTubeConfig>)
+                  })
                 }
                 step={0.5}
               />
               <NumberInput
                 label="Inner Height"
-                value={(config as RectangularTubeConfig).innerHeight}
+                value={config.innerHeight}
                 onChange={(v) =>
                   updateConfig({
                     innerHeight: v,
-                  } as Partial<RectangularTubeConfig>)
+                  })
                 }
                 step={0.5}
               />
               <NumberInput
                 label="Outer Width"
-                value={(config as RectangularTubeConfig).outerWidth}
+                value={config.outerWidth}
                 onChange={(v) =>
                   updateConfig({
                     outerWidth: v,
-                  } as Partial<RectangularTubeConfig>)
+                  })
                 }
                 step={0.5}
               />
               <NumberInput
                 label="Outer Height"
-                value={(config as RectangularTubeConfig).outerHeight}
+                value={config.outerHeight}
                 onChange={(v) =>
                   updateConfig({
                     outerHeight: v,
-                  } as Partial<RectangularTubeConfig>)
+                  })
                 }
                 step={0.5}
               />
               <NumberInput
                 label="Corner Radius"
-                value={(config as RectangularTubeConfig).cornerRadius}
+                value={config.cornerRadius}
                 onChange={(v) =>
                   updateConfig({
                     cornerRadius: v,
-                  } as Partial<RectangularTubeConfig>)
+                  })
                 }
                 step={0.5}
               />
@@ -393,7 +379,6 @@ export function TubeControls({ config, onChange }: TubeControlsProps) {
 
       <Section title="Top End" defaultOpen={true}>
         <EndCutControls
-          label="Top Cut"
           cutConfig={config.topCut}
           onChange={(cut) => updateConfig({ topCut: cut })}
           outerSize={getOuterSize()}
@@ -409,7 +394,6 @@ export function TubeControls({ config, onChange }: TubeControlsProps) {
 
       <Section title="Bottom End" defaultOpen={false}>
         <EndCutControls
-          label="Bottom Cut"
           cutConfig={config.bottomCut}
           onChange={(cut) => updateConfig({ bottomCut: cut })}
           outerSize={getOuterSize()}
@@ -419,7 +403,13 @@ export function TubeControls({ config, onChange }: TubeControlsProps) {
       <Divider />
 
       <Section title="Press-Fit Flare" defaultOpen={true}>
-        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
           <Box sx={{ flex: 1 }}>
             <Typography variant="body2" fontWeight={500}>
               Enable Flare
@@ -450,7 +440,13 @@ export function TubeControls({ config, onChange }: TubeControlsProps) {
               <Typography variant="body2" fontWeight={500}>
                 Flare Dimensions
               </Typography>
-              <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1.5 }}>
+              <Box
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: 1.5,
+                }}
+              >
                 {config.shape === "round" && (
                   <NumberInput
                     label="Flare Diameter"
@@ -496,13 +492,21 @@ export function TubeControls({ config, onChange }: TubeControlsProps) {
               <Typography variant="body2" fontWeight={500}>
                 Fit Tolerance
               </Typography>
-              <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1.5 }}>
+              <Box
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: 1.5,
+                }}
+              >
                 <TextField
                   select
                   label="Fit Type"
                   value={config.flare.fitType}
                   onChange={(e) =>
-                    updateFlare({ fitType: e.target.value as FlareConfig["fitType"] })
+                    updateFlare({
+                      fitType: e.target.value as FlareConfig["fitType"],
+                    })
                   }
                   fullWidth
                 >
@@ -532,7 +536,13 @@ export function TubeControls({ config, onChange }: TubeControlsProps) {
 
             {/* Lead-in chamfer */}
             <Stack spacing={1.5}>
-              <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                }}
+              >
                 <Box>
                   <Typography variant="body2" fontWeight={500}>
                     Lead-in Chamfer
@@ -543,7 +553,9 @@ export function TubeControls({ config, onChange }: TubeControlsProps) {
                 </Box>
                 <Switch
                   checked={config.flare.leadInChamfer}
-                  onChange={(e) => updateFlare({ leadInChamfer: e.target.checked })}
+                  onChange={(e) =>
+                    updateFlare({ leadInChamfer: e.target.checked })
+                  }
                 />
               </Box>
               {config.flare.leadInChamfer && (
@@ -563,7 +575,13 @@ export function TubeControls({ config, onChange }: TubeControlsProps) {
 
             {/* Stop shoulder */}
             <Stack spacing={1.5}>
-              <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                }}
+              >
                 <Box>
                   <Typography variant="body2" fontWeight={500}>
                     Stop Shoulder
@@ -574,7 +592,9 @@ export function TubeControls({ config, onChange }: TubeControlsProps) {
                 </Box>
                 <Switch
                   checked={config.flare.stopShoulder}
-                  onChange={(e) => updateFlare({ stopShoulder: e.target.checked })}
+                  onChange={(e) =>
+                    updateFlare({ stopShoulder: e.target.checked })
+                  }
                 />
               </Box>
               {config.flare.stopShoulder && (
@@ -593,7 +613,13 @@ export function TubeControls({ config, onChange }: TubeControlsProps) {
 
             {/* Anti-rotation */}
             <Stack spacing={1.5}>
-              <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                }}
+              >
                 <Box>
                   <Typography variant="body2" fontWeight={500}>
                     Anti-Rotation
@@ -604,7 +630,9 @@ export function TubeControls({ config, onChange }: TubeControlsProps) {
                 </Box>
                 <Switch
                   checked={config.flare.antiRotation}
-                  onChange={(e) => updateFlare({ antiRotation: e.target.checked })}
+                  onChange={(e) =>
+                    updateFlare({ antiRotation: e.target.checked })
+                  }
                 />
               </Box>
               {config.flare.antiRotation && (
@@ -613,7 +641,8 @@ export function TubeControls({ config, onChange }: TubeControlsProps) {
                   value={config.flare.antiRotationType}
                   onChange={(e) =>
                     updateFlare({
-                      antiRotationType: e.target.value as FlareConfig["antiRotationType"],
+                      antiRotationType: e.target
+                        .value as FlareConfig["antiRotationType"],
                     })
                   }
                   fullWidth
