@@ -42,36 +42,6 @@ const theme = createTheme({
         },
       },
     },
-    MuiAccordion: {
-      defaultProps: {
-        disableGutters: true,
-        elevation: 0,
-      },
-      styleOverrides: {
-        root: {
-          backgroundColor: "transparent",
-          "&:before": { display: "none" },
-        },
-      },
-    },
-    MuiAccordionSummary: {
-      styleOverrides: {
-        root: {
-          padding: 0,
-          minHeight: 40,
-        },
-        content: {
-          margin: "8px 0",
-        },
-      },
-    },
-    MuiAccordionDetails: {
-      styleOverrides: {
-        root: {
-          padding: "8px 0 0 0",
-        },
-      },
-    },
   },
 });
 

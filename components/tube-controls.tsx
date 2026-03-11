@@ -8,12 +8,7 @@ import TextField from "@mui/material/TextField";
 import InputAdornment from "@mui/material/InputAdornment";
 import MenuItem from "@mui/material/MenuItem";
 import Switch from "@mui/material/Switch";
-import Accordion from "@mui/material/Accordion";
-import AccordionSummary from "@mui/material/AccordionSummary";
-import AccordionDetails from "@mui/material/AccordionDetails";
-import Divider from "@mui/material/Divider";
 import Stack from "@mui/material/Stack";
-import { ExpandMore } from "@mui/icons-material";
 import type {
   TubeConfig,
   TubeShape,
@@ -53,6 +48,7 @@ function NumberInput({
     <TextField
       label={label}
       type="number"
+      size="small"
       value={value}
       onChange={(e) => onChange(Number.parseFloat(e.target.value) || 0)}
       slotProps={{
@@ -72,26 +68,15 @@ function NumberInput({
   );
 }
 
-function Section({
-  title,
-  defaultOpen = true,
-  children,
-}: {
-  title: string;
-  defaultOpen?: boolean;
-  children: React.ReactNode;
-}) {
+function SectionHeader({ children }: { children: React.ReactNode }) {
   return (
-    <Accordion defaultExpanded={defaultOpen}>
-      <AccordionSummary expandIcon={<ExpandMore />}>
-        <Typography variant="body2" fontWeight={500}>
-          {title}
-        </Typography>
-      </AccordionSummary>
-      <AccordionDetails>
-        <Stack spacing={1.5}>{children}</Stack>
-      </AccordionDetails>
-    </Accordion>
+    <Typography
+      variant="overline"
+      color="text.secondary"
+      sx={{ letterSpacing: 1 }}
+    >
+      {children}
+    </Typography>
   );
 }
 
@@ -124,6 +109,7 @@ function EndCutControls({
     <Stack spacing={1.5}>
       <TextField
         select
+        size="small"
         value={cutConfig.type}
         onChange={(e) => handleTypeChange(e.target.value as CutType)}
         disabled={disabled}
@@ -136,17 +122,15 @@ function EndCutControls({
       </TextField>
 
       {cutConfig.type === "miter" && (
-        <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1.5 }}>
-          <NumberInput
-            label="Miter Angle"
-            value={cutConfig.angle}
-            onChange={(v) => onChange({ ...cutConfig, angle: v })}
-            min={0}
-            max={60}
-            step={1}
-            unit="°"
-          />
-        </Box>
+        <NumberInput
+          label="Miter Angle"
+          value={cutConfig.angle}
+          onChange={(v) => onChange({ ...cutConfig, angle: v })}
+          min={0}
+          max={60}
+          step={1}
+          unit="°"
+        />
       )}
 
       {cutConfig.type === "chamfer" && (
@@ -172,7 +156,7 @@ function EndCutControls({
       )}
 
       {cutConfig.type === "saddle" && (
-        <Stack spacing={1}>
+        <>
           <Typography variant="caption" color="text.secondary">
             Creates a curved cut to fit against another cylindrical pipe
           </Typography>
@@ -196,7 +180,7 @@ function EndCutControls({
               unit="°"
             />
           </Box>
-        </Stack>
+        </>
       )}
     </Stack>
   );
@@ -251,11 +235,13 @@ export function TubeControls({ config, onChange }: TubeControlsProps) {
   const canUseFlare = config.topCut.type === "flat";
 
   return (
-    <Stack spacing={0.5}>
-      {/* Shape Selection */}
-      <Section title="Tube Shape" defaultOpen={true}>
+    <Stack spacing={2.5}>
+      {/* Shape */}
+      <Stack spacing={1}>
+        <SectionHeader>Tube Shape</SectionHeader>
         <TextField
           select
+          size="small"
           value={config.shape}
           onChange={(e) => handleShapeChange(e.target.value as TubeShape)}
           fullWidth
@@ -264,12 +250,11 @@ export function TubeControls({ config, onChange }: TubeControlsProps) {
           <MenuItem value="square">Square</MenuItem>
           <MenuItem value="rectangular">Rectangular</MenuItem>
         </TextField>
-      </Section>
-
-      <Divider />
+      </Stack>
 
       {/* Dimensions */}
-      <Section title="Dimensions" defaultOpen={true}>
+      <Stack spacing={1}>
+        <SectionHeader>Dimensions</SectionHeader>
         <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1.5 }}>
           {config.shape === "round" && (
             <>
@@ -316,51 +301,31 @@ export function TubeControls({ config, onChange }: TubeControlsProps) {
               <NumberInput
                 label="Inner Width"
                 value={config.innerWidth}
-                onChange={(v) =>
-                  updateConfig({
-                    innerWidth: v,
-                  })
-                }
+                onChange={(v) => updateConfig({ innerWidth: v })}
                 step={0.5}
               />
               <NumberInput
                 label="Inner Height"
                 value={config.innerHeight}
-                onChange={(v) =>
-                  updateConfig({
-                    innerHeight: v,
-                  })
-                }
+                onChange={(v) => updateConfig({ innerHeight: v })}
                 step={0.5}
               />
               <NumberInput
                 label="Outer Width"
                 value={config.outerWidth}
-                onChange={(v) =>
-                  updateConfig({
-                    outerWidth: v,
-                  })
-                }
+                onChange={(v) => updateConfig({ outerWidth: v })}
                 step={0.5}
               />
               <NumberInput
                 label="Outer Height"
                 value={config.outerHeight}
-                onChange={(v) =>
-                  updateConfig({
-                    outerHeight: v,
-                  })
-                }
+                onChange={(v) => updateConfig({ outerHeight: v })}
                 step={0.5}
               />
               <NumberInput
                 label="Corner Radius"
                 value={config.cornerRadius}
-                onChange={(v) =>
-                  updateConfig({
-                    cornerRadius: v,
-                  })
-                }
+                onChange={(v) => updateConfig({ cornerRadius: v })}
                 step={0.5}
               />
             </>
@@ -373,11 +338,11 @@ export function TubeControls({ config, onChange }: TubeControlsProps) {
             step={1}
           />
         </Box>
-      </Section>
+      </Stack>
 
-      <Divider />
-
-      <Section title="Top End" defaultOpen={true}>
+      {/* Top End */}
+      <Stack spacing={1}>
+        <SectionHeader>Top End</SectionHeader>
         <EndCutControls
           cutConfig={config.topCut}
           onChange={(cut) => updateConfig({ topCut: cut })}
@@ -388,21 +353,20 @@ export function TubeControls({ config, onChange }: TubeControlsProps) {
             Flare disabled - only works with flat top cut
           </Typography>
         )}
-      </Section>
+      </Stack>
 
-      <Divider />
-
-      <Section title="Bottom End" defaultOpen={false}>
+      {/* Bottom End */}
+      <Stack spacing={1}>
+        <SectionHeader>Bottom End</SectionHeader>
         <EndCutControls
           cutConfig={config.bottomCut}
           onChange={(cut) => updateConfig({ bottomCut: cut })}
           outerSize={getOuterSize()}
         />
-      </Section>
+      </Stack>
 
-      <Divider />
-
-      <Section title="Press-Fit Flare" defaultOpen={true}>
+      {/* Press-Fit Flare */}
+      <Stack spacing={1.5}>
         <Box
           sx={{
             display: "flex",
@@ -411,10 +375,8 @@ export function TubeControls({ config, onChange }: TubeControlsProps) {
           }}
         >
           <Box sx={{ flex: 1 }}>
-            <Typography variant="body2" fontWeight={500}>
-              Enable Flare
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
+            <SectionHeader>Press-Fit Flare</SectionHeader>
+            <Typography variant="caption" color="text.secondary" display="block">
               Add a flared end for press-fit connections
             </Typography>
           </Box>
@@ -432,11 +394,9 @@ export function TubeControls({ config, onChange }: TubeControlsProps) {
         )}
 
         {config.flare.enabled && canUseFlare && (
-          <>
-            <Divider sx={{ opacity: 0.3 }} />
-
-            {/* Basic flare dimensions */}
-            <Stack spacing={1.5}>
+          <Stack spacing={2}>
+            {/* Flare dimensions */}
+            <Stack spacing={1}>
               <Typography variant="body2" fontWeight={500}>
                 Flare Dimensions
               </Typography>
@@ -485,10 +445,8 @@ export function TubeControls({ config, onChange }: TubeControlsProps) {
               </Box>
             </Stack>
 
-            <Divider sx={{ opacity: 0.3 }} />
-
-            {/* Fit tolerance controls */}
-            <Stack spacing={1.5}>
+            {/* Fit tolerance */}
+            <Stack spacing={1}>
               <Typography variant="body2" fontWeight={500}>
                 Fit Tolerance
               </Typography>
@@ -501,6 +459,7 @@ export function TubeControls({ config, onChange }: TubeControlsProps) {
               >
                 <TextField
                   select
+                  size="small"
                   label="Fit Type"
                   value={config.flare.fitType}
                   onChange={(e) =>
@@ -532,130 +491,119 @@ export function TubeControls({ config, onChange }: TubeControlsProps) {
               )}
             </Stack>
 
-            <Divider sx={{ opacity: 0.3 }} />
-
             {/* Lead-in chamfer */}
-            <Stack spacing={1.5}>
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                }}
-              >
-                <Box>
-                  <Typography variant="body2" fontWeight={500}>
-                    Lead-in Chamfer
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    Easier assembly, less elephant-foot issues
-                  </Typography>
-                </Box>
-                <Switch
-                  checked={config.flare.leadInChamfer}
-                  onChange={(e) =>
-                    updateFlare({ leadInChamfer: e.target.checked })
-                  }
-                />
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              <Box>
+                <Typography variant="body2" fontWeight={500}>
+                  Lead-in Chamfer
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  Easier assembly, less elephant-foot issues
+                </Typography>
               </Box>
-              {config.flare.leadInChamfer && (
-                <NumberInput
-                  label="Chamfer Angle"
-                  value={config.flare.leadInAngle}
-                  onChange={(v) => updateFlare({ leadInAngle: v })}
-                  min={30}
-                  max={60}
-                  step={5}
-                  unit="°"
-                />
-              )}
-            </Stack>
-
-            <Divider sx={{ opacity: 0.3 }} />
+              <Switch
+                checked={config.flare.leadInChamfer}
+                onChange={(e) =>
+                  updateFlare({ leadInChamfer: e.target.checked })
+                }
+              />
+            </Box>
+            {config.flare.leadInChamfer && (
+              <NumberInput
+                label="Chamfer Angle"
+                value={config.flare.leadInAngle}
+                onChange={(v) => updateFlare({ leadInAngle: v })}
+                min={30}
+                max={60}
+                step={5}
+                unit="°"
+              />
+            )}
 
             {/* Stop shoulder */}
-            <Stack spacing={1.5}>
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                }}
-              >
-                <Box>
-                  <Typography variant="body2" fontWeight={500}>
-                    Stop Shoulder
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    Internal step for consistent seating
-                  </Typography>
-                </Box>
-                <Switch
-                  checked={config.flare.stopShoulder}
-                  onChange={(e) =>
-                    updateFlare({ stopShoulder: e.target.checked })
-                  }
-                />
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              <Box>
+                <Typography variant="body2" fontWeight={500}>
+                  Stop Shoulder
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  Internal step for consistent seating
+                </Typography>
               </Box>
-              {config.flare.stopShoulder && (
-                <NumberInput
-                  label="Stop Depth"
-                  value={config.flare.stopDepth}
-                  onChange={(v) => updateFlare({ stopDepth: v })}
-                  min={1}
-                  max={10}
-                  step={0.5}
-                />
-              )}
-            </Stack>
-
-            <Divider sx={{ opacity: 0.3 }} />
+              <Switch
+                checked={config.flare.stopShoulder}
+                onChange={(e) =>
+                  updateFlare({ stopShoulder: e.target.checked })
+                }
+              />
+            </Box>
+            {config.flare.stopShoulder && (
+              <NumberInput
+                label="Stop Depth"
+                value={config.flare.stopDepth}
+                onChange={(v) => updateFlare({ stopDepth: v })}
+                min={1}
+                max={10}
+                step={0.5}
+              />
+            )}
 
             {/* Anti-rotation */}
-            <Stack spacing={1.5}>
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                }}
-              >
-                <Box>
-                  <Typography variant="body2" fontWeight={500}>
-                    Anti-Rotation
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    Prevents press-fit parts from spinning
-                  </Typography>
-                </Box>
-                <Switch
-                  checked={config.flare.antiRotation}
-                  onChange={(e) =>
-                    updateFlare({ antiRotation: e.target.checked })
-                  }
-                />
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              <Box>
+                <Typography variant="body2" fontWeight={500}>
+                  Anti-Rotation
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  Prevents press-fit parts from spinning
+                </Typography>
               </Box>
-              {config.flare.antiRotation && (
-                <TextField
-                  select
-                  value={config.flare.antiRotationType}
-                  onChange={(e) =>
-                    updateFlare({
-                      antiRotationType: e.target
-                        .value as FlareConfig["antiRotationType"],
-                    })
-                  }
-                  fullWidth
-                >
-                  <MenuItem value="flat">Flat (D-shape)</MenuItem>
-                  <MenuItem value="key">Key (Slot)</MenuItem>
-                  <MenuItem value="notch">Notch</MenuItem>
-                </TextField>
-              )}
-            </Stack>
-          </>
+              <Switch
+                checked={config.flare.antiRotation}
+                onChange={(e) =>
+                  updateFlare({ antiRotation: e.target.checked })
+                }
+              />
+            </Box>
+            {config.flare.antiRotation && (
+              <TextField
+                select
+                size="small"
+                value={config.flare.antiRotationType}
+                onChange={(e) =>
+                  updateFlare({
+                    antiRotationType: e.target
+                      .value as FlareConfig["antiRotationType"],
+                  })
+                }
+                fullWidth
+              >
+                <MenuItem value="flat">Flat (D-shape)</MenuItem>
+                <MenuItem value="key">Key (Slot)</MenuItem>
+                <MenuItem value="notch">Notch</MenuItem>
+              </TextField>
+            )}
+          </Stack>
         )}
-      </Section>
+      </Stack>
     </Stack>
   );
 }

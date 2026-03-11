@@ -1,16 +1,13 @@
 "use client";
 
+import type React from "react";
+
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
 import InputAdornment from "@mui/material/InputAdornment";
 import MenuItem from "@mui/material/MenuItem";
-import Accordion from "@mui/material/Accordion";
-import AccordionSummary from "@mui/material/AccordionSummary";
-import AccordionDetails from "@mui/material/AccordionDetails";
-import Divider from "@mui/material/Divider";
 import Stack from "@mui/material/Stack";
-import { ExpandMore } from "@mui/icons-material";
 import type {
   AdapterConfig,
   TubeSpec,
@@ -68,16 +65,26 @@ function NumberField({
   );
 }
 
-function TubeEndControls({
+function SectionHeader({ children }: { children: React.ReactNode }) {
+  return (
+    <Typography
+      variant="overline"
+      color="text.secondary"
+      sx={{ letterSpacing: 1 }}
+    >
+      {children}
+    </Typography>
+  );
+}
+
+function TubeEndSection({
   label,
   tube,
   onChange,
-  defaultExpanded = true,
 }: {
   label: string;
   tube: TubeSpec;
   onChange: (tube: TubeSpec) => void;
-  defaultExpanded?: boolean;
 }) {
   const handleShapeChange = (shape: AdapterEndShape) => {
     if (shape === tube.shape) return;
@@ -98,219 +105,177 @@ function TubeEndControls({
   };
 
   return (
-    <Accordion defaultExpanded={defaultExpanded}>
-      <AccordionSummary expandIcon={<ExpandMore />}>
-        <Typography variant="body2" fontWeight={500}>
-          {label}
-        </Typography>
-      </AccordionSummary>
-      <AccordionDetails>
-        <Stack spacing={1.5}>
-          {/* Shape Selection */}
-          <TextField
-            select
-            label="Tube Shape"
-            size="small"
-            value={tube.shape}
-            onChange={(e) =>
-              handleShapeChange(e.target.value as AdapterEndShape)
-            }
-            fullWidth
+    <Stack spacing={1}>
+      <SectionHeader>{label}</SectionHeader>
+      <TextField
+        select
+        label="Tube Shape"
+        size="small"
+        value={tube.shape}
+        onChange={(e) =>
+          handleShapeChange(e.target.value as AdapterEndShape)
+        }
+        fullWidth
+      >
+        <MenuItem value="round">Round / Circular</MenuItem>
+        <MenuItem value="square">Square</MenuItem>
+        <MenuItem value="rectangular">Rectangular</MenuItem>
+      </TextField>
+
+      <Typography variant="caption" color="text.secondary">
+        Enter the outer dimensions of the tube that will connect here.
+      </Typography>
+
+      {tube.shape === "round" && (
+        <NumberField
+          label="Tube Outer Diameter"
+          value={tube.outerDiameter}
+          onChange={(v) => onChange({ ...tube, outerDiameter: v })}
+          min={1}
+        />
+      )}
+
+      {tube.shape === "square" && (
+        <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1.5 }}>
+          <NumberField
+            label="Tube Outer Size"
+            value={tube.outerSize}
+            onChange={(v) => onChange({ ...tube, outerSize: v })}
+            min={1}
+          />
+          <NumberField
+            label="Corner Radius"
+            value={tube.cornerRadius}
+            onChange={(v) => onChange({ ...tube, cornerRadius: v })}
+            min={0}
+          />
+        </Box>
+      )}
+
+      {tube.shape === "rectangular" && (
+        <>
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: 1.5,
+            }}
           >
-            <MenuItem value="round">Round / Circular</MenuItem>
-            <MenuItem value="square">Square</MenuItem>
-            <MenuItem value="rectangular">Rectangular</MenuItem>
-          </TextField>
-
-          {/* Dimensions */}
-          <Typography variant="caption" color="text.secondary">
-            Enter the outer dimensions of the tube that will connect here.
-          </Typography>
-
-          {tube.shape === "round" && (
             <NumberField
-              label="Tube Outer Diameter"
-              value={tube.outerDiameter}
-              onChange={(v) => onChange({ ...tube, outerDiameter: v })}
+              label="Tube Outer Width"
+              value={tube.outerWidth}
+              onChange={(v) => onChange({ ...tube, outerWidth: v })}
               min={1}
             />
-          )}
-
-          {tube.shape === "square" && (
-            <>
-              <NumberField
-                label="Tube Outer Size"
-                value={tube.outerSize}
-                onChange={(v) => onChange({ ...tube, outerSize: v })}
-                min={1}
-              />
-              <NumberField
-                label="Corner Radius"
-                value={tube.cornerRadius}
-                onChange={(v) => onChange({ ...tube, cornerRadius: v })}
-                min={0}
-              />
-            </>
-          )}
-
-          {tube.shape === "rectangular" && (
-            <>
-              <Box
-                sx={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr",
-                  gap: 1.5,
-                }}
-              >
-                <NumberField
-                  label="Tube Outer Width"
-                  value={tube.outerWidth}
-                  onChange={(v) => onChange({ ...tube, outerWidth: v })}
-                  min={1}
-                />
-                <NumberField
-                  label="Tube Outer Height"
-                  value={tube.outerHeight}
-                  onChange={(v) => onChange({ ...tube, outerHeight: v })}
-                  min={1}
-                />
-              </Box>
-              <NumberField
-                label="Corner Radius"
-                value={tube.cornerRadius}
-                onChange={(v) => onChange({ ...tube, cornerRadius: v })}
-                min={0}
-              />
-            </>
-          )}
-        </Stack>
-      </AccordionDetails>
-    </Accordion>
+            <NumberField
+              label="Tube Outer Height"
+              value={tube.outerHeight}
+              onChange={(v) => onChange({ ...tube, outerHeight: v })}
+              min={1}
+            />
+          </Box>
+          <NumberField
+            label="Corner Radius"
+            value={tube.cornerRadius}
+            onChange={(v) => onChange({ ...tube, cornerRadius: v })}
+            min={0}
+          />
+        </>
+      )}
+    </Stack>
   );
 }
 
 export function AdapterControls({ config, onChange }: AdapterControlsProps) {
   return (
-    <Stack spacing={0.5}>
-      {/* End A - Bottom socket */}
-      <TubeEndControls
+    <Stack spacing={2.5}>
+      {/* Socket A */}
+      <TubeEndSection
         label="Socket A (Bottom)"
         tube={config.endA}
         onChange={(endA) => onChange({ ...config, endA })}
       />
 
-      <Divider />
-
-      {/* End B - Top socket */}
-      <TubeEndControls
+      {/* Socket B */}
+      <TubeEndSection
         label="Socket B (Top)"
         tube={config.endB}
         onChange={(endB) => onChange({ ...config, endB })}
-        defaultExpanded
       />
 
-      <Divider />
+      {/* Adapter Body */}
+      <Stack spacing={1}>
+        <SectionHeader>Adapter Body</SectionHeader>
+        <Box
+          sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1.5 }}
+        >
+          <NumberField
+            label="Wall Thickness"
+            value={config.wallThickness}
+            onChange={(v) => onChange({ ...config, wallThickness: v })}
+            min={1}
+            step={0.5}
+          />
+          <NumberField
+            label="Socket Depth"
+            value={config.socketDepth}
+            onChange={(v) => onChange({ ...config, socketDepth: v })}
+            min={5}
+          />
+        </Box>
+        <NumberField
+          label="Socket Clearance (fit tolerance)"
+          value={config.socketClearance}
+          onChange={(v) => onChange({ ...config, socketClearance: v })}
+          min={0}
+          step={0.05}
+        />
+        <Typography variant="caption" color="text.secondary">
+          0.2mm for snug fit, 0.3mm for loose fit
+        </Typography>
+      </Stack>
 
-      {/* Adapter Body Settings */}
-      <Accordion defaultExpanded>
-        <AccordionSummary expandIcon={<ExpandMore />}>
-          <Typography variant="body2" fontWeight={500}>
-            Adapter Body
-          </Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-          <Stack spacing={2}>
-            <Box
-              sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1.5 }}
-            >
-              <NumberField
-                label="Wall Thickness"
-                value={config.wallThickness}
-                onChange={(v) => onChange({ ...config, wallThickness: v })}
-                min={1}
-                step={0.5}
-              />
-              <NumberField
-                label="Socket Depth"
-                value={config.socketDepth}
-                onChange={(v) => onChange({ ...config, socketDepth: v })}
-                min={5}
-              />
-            </Box>
-            <NumberField
-              label="Socket Clearance (fit tolerance)"
-              value={config.socketClearance}
-              onChange={(v) => onChange({ ...config, socketClearance: v })}
-              min={0}
-              step={0.05}
-            />
-            <Typography variant="caption" color="text.secondary">
-              0.2mm for snug fit, 0.3mm for loose fit
-            </Typography>
-          </Stack>
-        </AccordionDetails>
-      </Accordion>
+      {/* Elbow / Bend */}
+      <Stack spacing={1}>
+        <SectionHeader>Elbow / Bend</SectionHeader>
+        <NumberField
+          label="Bend Angle"
+          value={config.bendAngle}
+          onChange={(v) => onChange({ ...config, bendAngle: v })}
+          min={0}
+          max={180}
+          unit="°"
+        />
+        <Typography variant="caption" color="text.secondary">
+          0° = straight coupling, 45° = 45° elbow, 90° = 90° elbow
+        </Typography>
+        <NumberField
+          label="Bend Radius (0 = auto)"
+          value={config.bendRadius}
+          onChange={(v) => onChange({ ...config, bendRadius: v })}
+          min={0}
+        />
+        <Typography variant="caption" color="text.secondary">
+          Leave at 0 to auto-calculate based on tube size
+        </Typography>
+      </Stack>
 
-      <Divider />
-
-      {/* Bend Settings */}
-      <Accordion>
-        <AccordionSummary expandIcon={<ExpandMore />}>
-          <Typography variant="body2" fontWeight={500}>
-            Elbow / Bend
-          </Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-          <Stack spacing={1.5}>
-            <NumberField
-              label="Bend Angle"
-              value={config.bendAngle}
-              onChange={(v) => onChange({ ...config, bendAngle: v })}
-              min={0}
-              max={180}
-              unit="°"
-            />
-            <Typography variant="caption" color="text.secondary">
-              0° = straight coupling, 45° = 45° elbow, 90° = 90° elbow
-            </Typography>
-            <NumberField
-              label="Bend Radius (0 = auto)"
-              value={config.bendRadius}
-              onChange={(v) => onChange({ ...config, bendRadius: v })}
-              min={0}
-            />
-            <Typography variant="caption" color="text.secondary">
-              Leave at 0 to auto-calculate based on tube size
-            </Typography>
-          </Stack>
-        </AccordionDetails>
-      </Accordion>
-
-      <Divider />
-
-      <Accordion>
-        <AccordionSummary expandIcon={<ExpandMore />}>
-          <Typography variant="body2" fontWeight={500}>
-            Segments
-          </Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-          <Stack spacing={1.5}>
-            <NumberField
-              label="Amount of Segments"
-              value={config.segmentAmount}
-              onChange={(v) => onChange({ ...config, segmentAmount: v })}
-              min={4}
-              unit=""
-            />
-            <Typography variant="caption" color="text.secondary">
-              Amount of Segments in a circle that the exported STL will have.
-              Increasing this will increase the circular resolution at the
-              expense of file size.
-            </Typography>
-          </Stack>
-        </AccordionDetails>
-      </Accordion>
+      {/* Segments */}
+      <Stack spacing={1}>
+        <SectionHeader>Segments</SectionHeader>
+        <NumberField
+          label="Amount of Segments"
+          value={config.segmentAmount}
+          onChange={(v) => onChange({ ...config, segmentAmount: v })}
+          min={4}
+          unit=""
+        />
+        <Typography variant="caption" color="text.secondary">
+          Amount of Segments in a circle that the exported STL will have.
+          Increasing this will increase the circular resolution at the expense of
+          file size.
+        </Typography>
+      </Stack>
     </Stack>
   );
 }
