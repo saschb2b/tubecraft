@@ -427,8 +427,15 @@ function DimensionLabel({
   return (
     <Html position={position} center style={{ pointerEvents: "none" }}>
       <div
-        className="text-xs font-mono px-1.5 py-0.5 rounded whitespace-nowrap"
-        style={{ color, textShadow: "0 1px 2px rgba(0,0,0,0.8)" }}
+        style={{
+          fontSize: "0.75rem",
+          fontFamily: "monospace",
+          padding: "2px 6px",
+          borderRadius: 4,
+          whiteSpace: "nowrap",
+          color,
+          textShadow: "0 1px 2px rgba(0,0,0,0.8)",
+        }}
       >
         {text}
       </div>

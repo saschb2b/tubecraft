@@ -1,7 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Typography from "@mui/material/Typography";
+import Tabs from "@mui/material/Tabs";
+import Tab from "@mui/material/Tab";
+import Chip from "@mui/material/Chip";
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
+import Divider from "@mui/material/Divider";
+import Stack from "@mui/material/Stack";
+import IconButton from "@mui/material/IconButton";
 import { TubePreview } from "@/components/tube-preview";
 import { TubeControls } from "@/components/tube-controls";
 import { AdapterPreview } from "@/components/adapter-preview";
@@ -15,20 +26,13 @@ import { DEFAULT_ADAPTER_CONFIG } from "@/lib/adapter-types";
 import {
   Download,
   RotateCcw,
-  Box,
+  Box as BoxIcon,
   Coffee,
   Heart,
   ExternalLink,
   Github,
   Link2,
 } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { getEffectiveBendRadius } from "@/lib/adapter-types";
 
 type TabType = "tube" | "adapter";
@@ -48,7 +52,6 @@ export default function Home() {
       const filename = `tube-${shapeName}-${tubeConfig.length}mm.stl`;
       downloadSTL(tubeConfig, filename);
     } else {
-      const bendRadius = getEffectiveBendRadius(adapterConfig);
       const filename = `adapter-${adapterConfig.endA.shape}-to-${adapterConfig.endB.shape}-${adapterConfig.bendAngle}deg.stl`;
       downloadAdapterSTL(adapterConfig, filename);
     }
@@ -69,21 +72,21 @@ export default function Home() {
     if (tubeConfig.flare.enabled && tubeConfig.topCut.type === "flat") {
       badges.push({
         label: `Press-Fit (${tubeConfig.flare.fitType})`,
-        color: "bg-pink-500/10 text-pink-500",
+        color: "#ec4899",
       });
     }
 
     if (tubeConfig.topCut.type !== "flat") {
       badges.push({
         label: `Top: ${tubeConfig.topCut.type}`,
-        color: "bg-purple-500/10 text-purple-500",
+        color: "#a855f7",
       });
     }
 
     if (tubeConfig.bottomCut.type !== "flat") {
       badges.push({
         label: `Bottom: ${tubeConfig.bottomCut.type}`,
-        color: "bg-orange-500/10 text-orange-500",
+        color: "#f97316",
       });
     }
 
@@ -96,19 +99,19 @@ export default function Home() {
     if (adapterConfig.endA.shape !== adapterConfig.endB.shape) {
       badges.push({
         label: `${adapterConfig.endA.shape} → ${adapterConfig.endB.shape}`,
-        color: "bg-blue-500/10 text-blue-500",
+        color: "#3b82f6",
       });
     }
 
     if (adapterConfig.bendAngle > 0) {
       badges.push({
         label: `${adapterConfig.bendAngle}° elbow`,
-        color: "bg-purple-500/10 text-purple-500",
+        color: "#a855f7",
       });
     } else {
       badges.push({
         label: "Straight coupling",
-        color: "bg-green-500/10 text-green-500",
+        color: "#22c55e",
       });
     }
 
@@ -118,50 +121,58 @@ export default function Home() {
   const badges = activeTab === "tube" ? getTubeBadges() : getAdapterBadges();
 
   return (
-    <div className="flex min-h-screen flex-col lg:flex-row">
+    <Box sx={{ display: "flex", minHeight: "100vh", flexDirection: { xs: "column", lg: "row" } }}>
       {/* Sidebar Controls */}
-      <aside className="w-full lg:w-80 xl:w-96 border-b lg:border-b-0 lg:border-r border-border bg-card flex flex-col">
+      <Box
+        component="aside"
+        sx={{
+          width: { xs: "100%", lg: 320, xl: 384 },
+          borderBottom: { xs: 1, lg: 0 },
+          borderRight: { lg: 1 },
+          borderColor: "divider",
+          bgcolor: "background.paper",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
         {/* Header */}
-        <div className="flex items-center gap-3 p-4 border-b border-border">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-            <Box className="h-5 w-5 text-primary-foreground" />
-          </div>
-          <div>
-            <h1 className="text-lg font-semibold text-foreground">TubeCraft</h1>
-            <p className="text-xs text-muted-foreground">
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, p: 2, borderBottom: 1, borderColor: "divider" }}>
+          <Box
+            sx={{
+              display: "flex",
+              height: 36,
+              width: 36,
+              alignItems: "center",
+              justifyContent: "center",
+              borderRadius: 2,
+              bgcolor: "primary.main",
+            }}
+          >
+            <BoxIcon size={20} color="#1a1b2e" />
+          </Box>
+          <Box>
+            <Typography variant="subtitle1" fontWeight={600}>
+              TubeCraft
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
               3D Printable Tube Generator
-            </p>
-          </div>
-        </div>
+            </Typography>
+          </Box>
+        </Box>
 
         {/* Tab Navigation */}
-        <div className="flex border-b border-border">
-          <button
-            onClick={() => setActiveTab("tube")}
-            className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-colors ${
-              activeTab === "tube"
-                ? "bg-muted text-foreground border-b-2 border-primary"
-                : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-            }`}
-          >
-            <Box className="h-4 w-4" />
-            Tubes
-          </button>
-          <button
-            onClick={() => setActiveTab("adapter")}
-            className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-colors ${
-              activeTab === "adapter"
-                ? "bg-muted text-foreground border-b-2 border-primary"
-                : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-            }`}
-          >
-            <Link2 className="h-4 w-4" />
-            Adapters
-          </button>
-        </div>
+        <Tabs
+          value={activeTab}
+          onChange={(_, v) => setActiveTab(v)}
+          variant="fullWidth"
+          sx={{ borderBottom: 1, borderColor: "divider" }}
+        >
+          <Tab icon={<BoxIcon size={16} />} iconPosition="start" label="Tubes" value="tube" />
+          <Tab icon={<Link2 size={16} />} iconPosition="start" label="Adapters" value="adapter" />
+        </Tabs>
 
         {/* Controls */}
-        <div className="flex-1 overflow-y-auto p-4">
+        <Box sx={{ flex: 1, overflow: "auto", p: 2 }}>
           {activeTab === "tube" ? (
             <TubeControls config={tubeConfig} onChange={setTubeConfig} />
           ) : (
@@ -170,174 +181,252 @@ export default function Home() {
               onChange={setAdapterConfig}
             />
           )}
-        </div>
+        </Box>
 
         {/* Actions */}
-        <div className="border-t border-border p-4 space-y-2">
-          <Button onClick={handleDownload} className="w-full gap-2" size="lg">
-            <Download className="h-4 w-4" />
-            Download STL
-          </Button>
-          <Button
-            onClick={handleReset}
-            variant="outline"
-            className="w-full gap-2 bg-transparent"
-            size="sm"
-          >
-            <RotateCcw className="h-3.5 w-3.5" />
-            Reset to Default
-          </Button>
-        </div>
-      </aside>
+        <Box sx={{ borderTop: 1, borderColor: "divider", p: 2 }}>
+          <Stack spacing={1}>
+            <Button
+              onClick={handleDownload}
+              variant="contained"
+              size="large"
+              fullWidth
+              startIcon={<Download size={16} />}
+            >
+              Download STL
+            </Button>
+            <Button
+              onClick={handleReset}
+              variant="outlined"
+              size="small"
+              fullWidth
+              startIcon={<RotateCcw size={14} />}
+            >
+              Reset to Default
+            </Button>
+          </Stack>
+        </Box>
+      </Box>
 
       {/* Preview Area */}
-      <main className="flex-1 flex flex-col min-h-[50vh] lg:min-h-0">
+      <Box component="main" sx={{ flex: 1, display: "flex", flexDirection: "column", minHeight: { xs: "50vh", lg: 0 } }}>
         {/* Info Bar */}
-        <div className="flex items-center justify-between border-b border-border bg-card/50 px-4 py-2">
-          <div className="flex items-center gap-3 text-sm flex-wrap">
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            borderBottom: 1,
+            borderColor: "divider",
+            bgcolor: "rgba(36, 37, 56, 0.5)",
+            px: 2,
+            py: 1,
+          }}
+        >
+          <Stack direction="row" spacing={1.5} alignItems="center" flexWrap="wrap" useFlexGap>
             {activeTab === "tube" ? (
               <>
-                <span className="text-muted-foreground">
+                <Typography variant="body2" color="text.secondary">
                   Shape:{" "}
-                  <span className="text-foreground font-medium capitalize">
+                  <Typography component="span" variant="body2" fontWeight={500} color="text.primary" sx={{ textTransform: "capitalize" }}>
                     {tubeConfig.shape}
-                  </span>
-                </span>
-                <span className="text-muted-foreground">
+                  </Typography>
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
                   Length:{" "}
-                  <span className="text-foreground font-medium">
+                  <Typography component="span" variant="body2" fontWeight={500} color="text.primary">
                     {tubeConfig.length}mm
-                  </span>
-                </span>
+                  </Typography>
+                </Typography>
               </>
             ) : (
               <>
-                <span className="text-muted-foreground">
+                <Typography variant="body2" color="text.secondary">
                   Type:{" "}
-                  <span className="text-foreground font-medium capitalize">
+                  <Typography component="span" variant="body2" fontWeight={500} color="text.primary" sx={{ textTransform: "capitalize" }}>
                     {adapterConfig.endA.shape} to {adapterConfig.endB.shape}
-                  </span>
-                </span>
-                <span className="text-muted-foreground">
+                  </Typography>
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
                   Socket:{" "}
-                  <span className="text-foreground font-medium">
+                  <Typography component="span" variant="body2" fontWeight={500} color="text.primary">
                     {adapterConfig.socketDepth}mm
-                  </span>
-                </span>
+                  </Typography>
+                </Typography>
                 {adapterConfig.bendAngle > 0 && (
-                  <span className="text-muted-foreground">
+                  <Typography variant="body2" color="text.secondary">
                     Bend:{" "}
-                    <span className="text-foreground font-medium">
-                      {adapterConfig.bendAngle}°
-                    </span>
-                  </span>
+                    <Typography component="span" variant="body2" fontWeight={500} color="text.primary">
+                      {adapterConfig.bendAngle}&deg;
+                    </Typography>
+                  </Typography>
                 )}
               </>
             )}
             {badges.map((badge, i) => (
-              <span
+              <Chip
                 key={i}
-                className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${badge.color}`}
-              >
-                {badge.label}
-              </span>
+                label={badge.label}
+                size="small"
+                sx={{
+                  bgcolor: `${badge.color}1a`,
+                  color: badge.color,
+                  fontSize: "0.75rem",
+                  height: 24,
+                }}
+              />
             ))}
-          </div>
-          <p className="text-xs text-muted-foreground hidden sm:block">
+          </Stack>
+          <Typography
+            variant="caption"
+            color="text.secondary"
+            sx={{ display: { xs: "none", sm: "block" } }}
+          >
             Drag to rotate, scroll to zoom
-          </p>
-        </div>
+          </Typography>
+        </Box>
 
         {/* 3D Preview */}
-        <div className="flex-1 relative">
+        <Box sx={{ flex: 1, position: "relative" }}>
           {activeTab === "tube" ? (
             <TubePreview config={tubeConfig} />
           ) : (
             <AdapterPreview config={adapterConfig} />
           )}
-        </div>
+        </Box>
 
-        <footer className="border-t border-border bg-card/30 backdrop-blur-sm px-4 py-3">
-          <div className="flex items-center justify-between text-sm flex-wrap gap-2">
-            <div className="flex items-center gap-3">
-              <p className="text-muted-foreground">
+        <Box
+          component="footer"
+          sx={{
+            borderTop: 1,
+            borderColor: "divider",
+            bgcolor: "rgba(36, 37, 56, 0.3)",
+            backdropFilter: "blur(12px)",
+            px: 2,
+            py: 1.5,
+          }}
+        >
+          <Stack direction="row" justifyContent="space-between" alignItems="center" flexWrap="wrap" useFlexGap spacing={1}>
+            <Stack direction="row" spacing={1.5} alignItems="center">
+              <Typography variant="body2" color="text.secondary">
                 Made with{" "}
-                <Heart className="inline h-3.5 w-3.5 text-red-500 fill-red-500" />{" "}
+                <Heart
+                  size={14}
+                  color="#ef4444"
+                  fill="#ef4444"
+                  style={{ verticalAlign: "middle" }}
+                />{" "}
                 by Sascha
-              </p>
-              <a
+              </Typography>
+              <Box
+                component="a"
                 href="https://github.com/saschb2b/tubecraft"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
+                sx={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 0.75,
+                  color: "text.secondary",
+                  textDecoration: "none",
+                  "&:hover": { color: "text.primary" },
+                  transition: "color 0.2s",
+                }}
               >
-                <Github className="h-4 w-4" />
-                <span className="hidden sm:inline">Open Source</span>
-              </a>
-            </div>
-            <a
+                <Github size={16} />
+                <Typography variant="body2" sx={{ display: { xs: "none", sm: "inline" } }}>
+                  Open Source
+                </Typography>
+              </Box>
+            </Stack>
+            <Box
+              component="a"
               href="https://buymeacoffee.com/qohreuukw"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+              sx={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 1,
+                color: "text.secondary",
+                textDecoration: "none",
+                "&:hover": { color: "text.primary" },
+                transition: "color 0.2s",
+              }}
             >
-              <Coffee className="h-4 w-4" />
-              <span className="hidden sm:inline">Buy me a coffee</span>
-              <ExternalLink className="h-3 w-3" />
-            </a>
-          </div>
-        </footer>
-      </main>
+              <Coffee size={16} />
+              <Typography variant="body2" sx={{ display: { xs: "none", sm: "inline" } }}>
+                Buy me a coffee
+              </Typography>
+              <ExternalLink size={12} />
+            </Box>
+          </Stack>
+        </Box>
+      </Box>
 
-      <Dialog open={showThankYou} onOpenChange={setShowThankYou}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-xl">
-              <Download className="h-5 w-5 text-primary" />
-              Download Started!
-            </DialogTitle>
-            <DialogDescription asChild>
-              <div className="space-y-4 pt-4">
-                <div className="text-base text-foreground">
-                  Your STL file is ready for 3D printing. Thank you for using
-                  TubeCraft!
-                </div>
-                <div className="bg-muted/50 rounded-lg p-4 space-y-3">
-                  <div className="text-sm text-muted-foreground">
-                    If you find TubeCraft useful, consider supporting the
-                    project:
-                  </div>
-                  <div className="flex gap-2">
-                    <a
-                      href="https://github.com/saschb2b/tubecraft"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex flex-1 items-center justify-center gap-2 rounded-md bg-muted hover:bg-muted/80 text-foreground font-medium px-4 py-2.5 transition-colors"
-                    >
-                      <Github className="h-5 w-5" />
-                      Star on GitHub
-                      <ExternalLink className="h-4 w-4" />
-                    </a>
-                    <a
-                      href="https://buymeacoffee.com/qohreuukw"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex flex-1 items-center justify-center gap-2 rounded-md bg-[#FFDD00] hover:bg-[#FFDD00]/90 text-black font-medium px-4 py-2.5 transition-colors"
-                    >
-                      <Coffee className="h-5 w-5" />
-                      Buy me a coffee
-                      <ExternalLink className="h-4 w-4" />
-                    </a>
-                  </div>
-                </div>
-                <div className="text-xs text-muted-foreground text-center">
-                  Your support helps keep TubeCraft free and open source
-                </div>
-              </div>
-            </DialogDescription>
-          </DialogHeader>
+      <Dialog
+        open={showThankYou}
+        onClose={() => setShowThankYou(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <Download size={20} color="#34d399" />
+          Download Started!
+        </DialogTitle>
+        <DialogContent>
+          <Stack spacing={2.5}>
+            <Typography>
+              Your STL file is ready for 3D printing. Thank you for using
+              TubeCraft!
+            </Typography>
+            <Box
+              sx={{
+                bgcolor: "rgba(45, 46, 70, 0.5)",
+                borderRadius: 2,
+                p: 2.5,
+              }}
+            >
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
+                If you find TubeCraft useful, consider supporting the project:
+              </Typography>
+              <Stack direction="row" spacing={1}>
+                <Button
+                  component="a"
+                  href="https://github.com/saschb2b/tubecraft"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  variant="outlined"
+                  fullWidth
+                  startIcon={<Github size={20} />}
+                  endIcon={<ExternalLink size={16} />}
+                >
+                  Star on GitHub
+                </Button>
+                <Button
+                  component="a"
+                  href="https://buymeacoffee.com/qohreuukw"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  fullWidth
+                  startIcon={<Coffee size={20} />}
+                  endIcon={<ExternalLink size={16} />}
+                  sx={{
+                    bgcolor: "#FFDD00",
+                    color: "#000",
+                    "&:hover": { bgcolor: "#e6c700" },
+                  }}
+                >
+                  Buy me a coffee
+                </Button>
+              </Stack>
+            </Box>
+            <Typography variant="caption" color="text.secondary" textAlign="center">
+              Your support helps keep TubeCraft free and open source
+            </Typography>
+          </Stack>
         </DialogContent>
       </Dialog>
-    </div>
+    </Box>
   );
 }

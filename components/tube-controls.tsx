@@ -2,23 +2,18 @@
 
 import type React from "react";
 
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import { ChevronDown } from "lucide-react";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
+import TextField from "@mui/material/TextField";
+import InputAdornment from "@mui/material/InputAdornment";
+import MenuItem from "@mui/material/MenuItem";
+import Switch from "@mui/material/Switch";
+import Accordion from "@mui/material/Accordion";
+import AccordionSummary from "@mui/material/AccordionSummary";
+import AccordionDetails from "@mui/material/AccordionDetails";
+import Divider from "@mui/material/Divider";
+import Stack from "@mui/material/Stack";
+import { ExpandMore } from "@mui/icons-material";
 import { useState } from "react";
 import type {
   TubeConfig,
@@ -59,23 +54,25 @@ function NumberInput({
   unit?: string;
 }) {
   return (
-    <div className="space-y-1.5">
-      <Label className="text-xs text-muted-foreground">{label}</Label>
-      <div className="relative">
-        <Input
-          type="number"
-          value={value}
-          onChange={(e) => onChange(Number.parseFloat(e.target.value) || 0)}
-          min={min}
-          max={max}
-          step={step}
-          className="pr-10 bg-muted/50 border-border/50 h-9"
-        />
-        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
-          {unit}
-        </span>
-      </div>
-    </div>
+    <TextField
+      label={label}
+      type="number"
+      value={value}
+      onChange={(e) => onChange(Number.parseFloat(e.target.value) || 0)}
+      slotProps={{
+        htmlInput: { min, max, step },
+        input: {
+          endAdornment: (
+            <InputAdornment position="end">
+              <Typography variant="caption" color="text.secondary">
+                {unit}
+              </Typography>
+            </InputAdornment>
+          ),
+        },
+      }}
+      fullWidth
+    />
   );
 }
 
@@ -88,20 +85,17 @@ function Section({
   defaultOpen?: boolean;
   children: React.ReactNode;
 }) {
-  const [isOpen, setIsOpen] = useState(defaultOpen);
-
   return (
-    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-      <CollapsibleTrigger className="flex items-center justify-between w-full py-2 hover:bg-muted/50 rounded-md px-2 -mx-2">
-        <h3 className="text-sm font-medium text-foreground">{title}</h3>
-        <ChevronDown
-          className={`h-4 w-4 text-muted-foreground transition-transform ${isOpen ? "rotate-180" : ""}`}
-        />
-      </CollapsibleTrigger>
-      <CollapsibleContent className="pt-2 space-y-3">
-        {children}
-      </CollapsibleContent>
-    </Collapsible>
+    <Accordion defaultExpanded={defaultOpen}>
+      <AccordionSummary expandIcon={<ExpandMore />}>
+        <Typography variant="body2" fontWeight={500}>
+          {title}
+        </Typography>
+      </AccordionSummary>
+      <AccordionDetails>
+        <Stack spacing={1.5}>{children}</Stack>
+      </AccordionDetails>
+    </Accordion>
   );
 }
 
@@ -133,25 +127,22 @@ function EndCutControls({
   };
 
   return (
-    <div className="space-y-3">
-      <Select
+    <Stack spacing={1.5}>
+      <TextField
+        select
         value={cutConfig.type}
-        onValueChange={(v) => handleTypeChange(v as CutType)}
+        onChange={(e) => handleTypeChange(e.target.value as CutType)}
         disabled={disabled}
+        fullWidth
       >
-        <SelectTrigger className="bg-muted/50 border-border/50">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="flat">Flat (Standard)</SelectItem>
-          <SelectItem value="miter">Miter (Angled)</SelectItem>
-          <SelectItem value="chamfer">Chamfer (Beveled Edge)</SelectItem>
-          <SelectItem value="saddle">Saddle (T-Joint / Fish-mouth)</SelectItem>
-        </SelectContent>
-      </Select>
+        <MenuItem value="flat">Flat (Standard)</MenuItem>
+        <MenuItem value="miter">Miter (Angled)</MenuItem>
+        <MenuItem value="chamfer">Chamfer (Beveled Edge)</MenuItem>
+        <MenuItem value="saddle">Saddle (T-Joint / Fish-mouth)</MenuItem>
+      </TextField>
 
       {cutConfig.type === "miter" && (
-        <div className="grid grid-cols-2 gap-3">
+        <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1.5 }}>
           <NumberInput
             label="Miter Angle"
             value={cutConfig.angle}
@@ -161,11 +152,11 @@ function EndCutControls({
             step={1}
             unit="°"
           />
-        </div>
+        </Box>
       )}
 
       {cutConfig.type === "chamfer" && (
-        <div className="grid grid-cols-2 gap-3">
+        <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1.5 }}>
           <NumberInput
             label="Chamfer Angle"
             value={cutConfig.angle}
@@ -183,15 +174,15 @@ function EndCutControls({
             max={10}
             step={0.5}
           />
-        </div>
+        </Box>
       )}
 
       {cutConfig.type === "saddle" && (
-        <div className="space-y-2">
-          <p className="text-xs text-muted-foreground">
+        <Stack spacing={1}>
+          <Typography variant="caption" color="text.secondary">
             Creates a curved cut to fit against another cylindrical pipe
-          </p>
-          <div className="grid grid-cols-2 gap-3">
+          </Typography>
+          <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1.5 }}>
             <NumberInput
               label="Target Pipe Diameter"
               value={cutConfig.targetDiameter}
@@ -208,10 +199,10 @@ function EndCutControls({
               step={1}
               unit="°"
             />
-          </div>
-        </div>
+          </Box>
+        </Stack>
       )}
-    </div>
+    </Stack>
   );
 }
 
@@ -264,29 +255,26 @@ export function TubeControls({ config, onChange }: TubeControlsProps) {
   const canUseFlare = config.topCut.type === "flat";
 
   return (
-    <div className="space-y-4">
+    <Stack spacing={0.5}>
       {/* Shape Selection */}
       <Section title="Tube Shape" defaultOpen={true}>
-        <Select
+        <TextField
+          select
           value={config.shape}
-          onValueChange={(v) => handleShapeChange(v as TubeShape)}
+          onChange={(e) => handleShapeChange(e.target.value as TubeShape)}
+          fullWidth
         >
-          <SelectTrigger className="bg-muted/50 border-border/50">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="round">Round / Circular</SelectItem>
-            <SelectItem value="square">Square</SelectItem>
-            <SelectItem value="rectangular">Rectangular</SelectItem>
-          </SelectContent>
-        </Select>
+          <MenuItem value="round">Round / Circular</MenuItem>
+          <MenuItem value="square">Square</MenuItem>
+          <MenuItem value="rectangular">Rectangular</MenuItem>
+        </TextField>
       </Section>
 
-      <Separator className="bg-border/50" />
+      <Divider />
 
       {/* Dimensions */}
       <Section title="Dimensions" defaultOpen={true}>
-        <div className="grid grid-cols-2 gap-3">
+        <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1.5 }}>
           {config.shape === "round" && (
             <>
               <NumberInput
@@ -398,10 +386,10 @@ export function TubeControls({ config, onChange }: TubeControlsProps) {
             onChange={(v) => updateConfig({ length: v })}
             step={1}
           />
-        </div>
+        </Box>
       </Section>
 
-      <Separator className="bg-border/50" />
+      <Divider />
 
       <Section title="Top End" defaultOpen={true}>
         <EndCutControls
@@ -411,13 +399,13 @@ export function TubeControls({ config, onChange }: TubeControlsProps) {
           outerSize={getOuterSize()}
         />
         {config.topCut.type !== "flat" && config.flare.enabled && (
-          <p className="text-xs text-amber-500">
+          <Typography variant="caption" color="warning.main">
             Flare disabled - only works with flat top cut
-          </p>
+          </Typography>
         )}
       </Section>
 
-      <Separator className="bg-border/50" />
+      <Divider />
 
       <Section title="Bottom End" defaultOpen={false}>
         <EndCutControls
@@ -428,219 +416,217 @@ export function TubeControls({ config, onChange }: TubeControlsProps) {
         />
       </Section>
 
-      <Separator className="bg-border/50" />
+      <Divider />
 
       <Section title="Press-Fit Flare" defaultOpen={true}>
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex-1">
-              <Label className="text-xs font-medium">Enable Flare</Label>
-              <p className="text-xs text-muted-foreground">
-                Add a flared end for press-fit connections
-              </p>
-            </div>
-            <Switch
-              checked={config.flare.enabled && canUseFlare}
-              onCheckedChange={(v) => updateFlare({ enabled: v })}
-              disabled={!canUseFlare}
-            />
-          </div>
+        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <Box sx={{ flex: 1 }}>
+            <Typography variant="body2" fontWeight={500}>
+              Enable Flare
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              Add a flared end for press-fit connections
+            </Typography>
+          </Box>
+          <Switch
+            checked={config.flare.enabled && canUseFlare}
+            onChange={(e) => updateFlare({ enabled: e.target.checked })}
+            disabled={!canUseFlare}
+          />
+        </Box>
 
-          {!canUseFlare && (
-            <p className="text-xs text-amber-500">
-              Flare only available with flat top cut
-            </p>
-          )}
+        {!canUseFlare && (
+          <Typography variant="caption" color="warning.main">
+            Flare only available with flat top cut
+          </Typography>
+        )}
 
-          {config.flare.enabled && canUseFlare && (
-            <>
-              <Separator className="bg-border/30" />
+        {config.flare.enabled && canUseFlare && (
+          <>
+            <Divider sx={{ opacity: 0.3 }} />
 
-              {/* Basic flare dimensions */}
-              <div className="space-y-3">
-                <Label className="text-xs font-medium">Flare Dimensions</Label>
-                <div className="grid grid-cols-2 gap-3">
-                  {config.shape === "round" && (
-                    <NumberInput
-                      label="Flare Diameter"
-                      value={config.flare.diameter}
-                      onChange={(v) => updateFlare({ diameter: v })}
-                      step={0.5}
-                    />
-                  )}
-
-                  {(config.shape === "square" ||
-                    config.shape === "rectangular") && (
-                    <>
-                      <NumberInput
-                        label="Flare Width"
-                        value={config.flare.width}
-                        onChange={(v) => updateFlare({ width: v })}
-                        step={0.5}
-                      />
-                      {config.shape === "rectangular" && (
-                        <NumberInput
-                          label="Flare Height"
-                          value={config.flare.height}
-                          onChange={(v) => updateFlare({ height: v })}
-                          step={0.5}
-                        />
-                      )}
-                    </>
-                  )}
-
+            {/* Basic flare dimensions */}
+            <Stack spacing={1.5}>
+              <Typography variant="body2" fontWeight={500}>
+                Flare Dimensions
+              </Typography>
+              <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1.5 }}>
+                {config.shape === "round" && (
                   <NumberInput
-                    label="Flare Length"
-                    value={config.flare.length}
-                    onChange={(v) => updateFlare({ length: v })}
-                    step={1}
-                  />
-                </div>
-              </div>
-
-              <Separator className="bg-border/30" />
-
-              {/* Fit tolerance controls */}
-              <div className="space-y-3">
-                <Label className="text-xs font-medium">Fit Tolerance</Label>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1.5">
-                    <Label className="text-xs text-muted-foreground">
-                      Fit Type
-                    </Label>
-                    <Select
-                      value={config.flare.fitType}
-                      onValueChange={(v) =>
-                        updateFlare({ fitType: v as FlareConfig["fitType"] })
-                      }
-                    >
-                      <SelectTrigger className="bg-muted/50 border-border/50 h-9">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="loose">Loose (0.3mm)</SelectItem>
-                        <SelectItem value="snug">Snug (0.15mm)</SelectItem>
-                        <SelectItem value="interference">
-                          Interference (-0.05mm)
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <NumberInput
-                    label="Clearance"
-                    value={config.flare.clearance}
-                    onChange={(v) => updateFlare({ clearance: v })}
-                    min={-0.2}
-                    max={1}
-                    step={0.05}
-                  />
-                </div>
-                {config.flare.fitType === "interference" && (
-                  <p className="text-xs text-amber-500">
-                    Warning: Interference fit may require force to assemble
-                  </p>
-                )}
-              </div>
-
-              <Separator className="bg-border/30" />
-
-              {/* Lead-in chamfer */}
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label className="text-xs font-medium">
-                      Lead-in Chamfer
-                    </Label>
-                    <p className="text-xs text-muted-foreground">
-                      Easier assembly, less elephant-foot issues
-                    </p>
-                  </div>
-                  <Switch
-                    checked={config.flare.leadInChamfer}
-                    onCheckedChange={(v) => updateFlare({ leadInChamfer: v })}
-                  />
-                </div>
-                {config.flare.leadInChamfer && (
-                  <NumberInput
-                    label="Chamfer Angle"
-                    value={config.flare.leadInAngle}
-                    onChange={(v) => updateFlare({ leadInAngle: v })}
-                    min={30}
-                    max={60}
-                    step={5}
-                    unit="°"
-                  />
-                )}
-              </div>
-
-              <Separator className="bg-border/30" />
-
-              {/* Stop shoulder */}
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label className="text-xs font-medium">Stop Shoulder</Label>
-                    <p className="text-xs text-muted-foreground">
-                      Internal step for consistent seating
-                    </p>
-                  </div>
-                  <Switch
-                    checked={config.flare.stopShoulder}
-                    onCheckedChange={(v) => updateFlare({ stopShoulder: v })}
-                  />
-                </div>
-                {config.flare.stopShoulder && (
-                  <NumberInput
-                    label="Stop Depth"
-                    value={config.flare.stopDepth}
-                    onChange={(v) => updateFlare({ stopDepth: v })}
-                    min={1}
-                    max={10}
+                    label="Flare Diameter"
+                    value={config.flare.diameter}
+                    onChange={(v) => updateFlare({ diameter: v })}
                     step={0.5}
                   />
                 )}
-              </div>
 
-              <Separator className="bg-border/30" />
-
-              {/* Anti-rotation */}
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label className="text-xs font-medium">Anti-Rotation</Label>
-                    <p className="text-xs text-muted-foreground">
-                      Prevents press-fit parts from spinning
-                    </p>
-                  </div>
-                  <Switch
-                    checked={config.flare.antiRotation}
-                    onCheckedChange={(v) => updateFlare({ antiRotation: v })}
-                  />
-                </div>
-                {config.flare.antiRotation && (
-                  <Select
-                    value={config.flare.antiRotationType}
-                    onValueChange={(v) =>
-                      updateFlare({
-                        antiRotationType: v as FlareConfig["antiRotationType"],
-                      })
-                    }
-                  >
-                    <SelectTrigger className="bg-muted/50 border-border/50 h-9">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="flat">Flat (D-shape)</SelectItem>
-                      <SelectItem value="key">Key (Slot)</SelectItem>
-                      <SelectItem value="notch">Notch</SelectItem>
-                    </SelectContent>
-                  </Select>
+                {(config.shape === "square" ||
+                  config.shape === "rectangular") && (
+                  <>
+                    <NumberInput
+                      label="Flare Width"
+                      value={config.flare.width}
+                      onChange={(v) => updateFlare({ width: v })}
+                      step={0.5}
+                    />
+                    {config.shape === "rectangular" && (
+                      <NumberInput
+                        label="Flare Height"
+                        value={config.flare.height}
+                        onChange={(v) => updateFlare({ height: v })}
+                        step={0.5}
+                      />
+                    )}
+                  </>
                 )}
-              </div>
-            </>
-          )}
-        </div>
+
+                <NumberInput
+                  label="Flare Length"
+                  value={config.flare.length}
+                  onChange={(v) => updateFlare({ length: v })}
+                  step={1}
+                />
+              </Box>
+            </Stack>
+
+            <Divider sx={{ opacity: 0.3 }} />
+
+            {/* Fit tolerance controls */}
+            <Stack spacing={1.5}>
+              <Typography variant="body2" fontWeight={500}>
+                Fit Tolerance
+              </Typography>
+              <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1.5 }}>
+                <TextField
+                  select
+                  label="Fit Type"
+                  value={config.flare.fitType}
+                  onChange={(e) =>
+                    updateFlare({ fitType: e.target.value as FlareConfig["fitType"] })
+                  }
+                  fullWidth
+                >
+                  <MenuItem value="loose">Loose (0.3mm)</MenuItem>
+                  <MenuItem value="snug">Snug (0.15mm)</MenuItem>
+                  <MenuItem value="interference">
+                    Interference (-0.05mm)
+                  </MenuItem>
+                </TextField>
+                <NumberInput
+                  label="Clearance"
+                  value={config.flare.clearance}
+                  onChange={(v) => updateFlare({ clearance: v })}
+                  min={-0.2}
+                  max={1}
+                  step={0.05}
+                />
+              </Box>
+              {config.flare.fitType === "interference" && (
+                <Typography variant="caption" color="warning.main">
+                  Warning: Interference fit may require force to assemble
+                </Typography>
+              )}
+            </Stack>
+
+            <Divider sx={{ opacity: 0.3 }} />
+
+            {/* Lead-in chamfer */}
+            <Stack spacing={1.5}>
+              <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <Box>
+                  <Typography variant="body2" fontWeight={500}>
+                    Lead-in Chamfer
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Easier assembly, less elephant-foot issues
+                  </Typography>
+                </Box>
+                <Switch
+                  checked={config.flare.leadInChamfer}
+                  onChange={(e) => updateFlare({ leadInChamfer: e.target.checked })}
+                />
+              </Box>
+              {config.flare.leadInChamfer && (
+                <NumberInput
+                  label="Chamfer Angle"
+                  value={config.flare.leadInAngle}
+                  onChange={(v) => updateFlare({ leadInAngle: v })}
+                  min={30}
+                  max={60}
+                  step={5}
+                  unit="°"
+                />
+              )}
+            </Stack>
+
+            <Divider sx={{ opacity: 0.3 }} />
+
+            {/* Stop shoulder */}
+            <Stack spacing={1.5}>
+              <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <Box>
+                  <Typography variant="body2" fontWeight={500}>
+                    Stop Shoulder
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Internal step for consistent seating
+                  </Typography>
+                </Box>
+                <Switch
+                  checked={config.flare.stopShoulder}
+                  onChange={(e) => updateFlare({ stopShoulder: e.target.checked })}
+                />
+              </Box>
+              {config.flare.stopShoulder && (
+                <NumberInput
+                  label="Stop Depth"
+                  value={config.flare.stopDepth}
+                  onChange={(v) => updateFlare({ stopDepth: v })}
+                  min={1}
+                  max={10}
+                  step={0.5}
+                />
+              )}
+            </Stack>
+
+            <Divider sx={{ opacity: 0.3 }} />
+
+            {/* Anti-rotation */}
+            <Stack spacing={1.5}>
+              <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <Box>
+                  <Typography variant="body2" fontWeight={500}>
+                    Anti-Rotation
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Prevents press-fit parts from spinning
+                  </Typography>
+                </Box>
+                <Switch
+                  checked={config.flare.antiRotation}
+                  onChange={(e) => updateFlare({ antiRotation: e.target.checked })}
+                />
+              </Box>
+              {config.flare.antiRotation && (
+                <TextField
+                  select
+                  value={config.flare.antiRotationType}
+                  onChange={(e) =>
+                    updateFlare({
+                      antiRotationType: e.target.value as FlareConfig["antiRotationType"],
+                    })
+                  }
+                  fullWidth
+                >
+                  <MenuItem value="flat">Flat (D-shape)</MenuItem>
+                  <MenuItem value="key">Key (Slot)</MenuItem>
+                  <MenuItem value="notch">Notch</MenuItem>
+                </TextField>
+              )}
+            </Stack>
+          </>
+        )}
       </Section>
-    </div>
+    </Stack>
   );
 }

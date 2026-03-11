@@ -1,21 +1,16 @@
 "use client";
 
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import { ChevronDown } from "lucide-react";
-import { useState } from "react";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
+import TextField from "@mui/material/TextField";
+import InputAdornment from "@mui/material/InputAdornment";
+import MenuItem from "@mui/material/MenuItem";
+import Accordion from "@mui/material/Accordion";
+import AccordionSummary from "@mui/material/AccordionSummary";
+import AccordionDetails from "@mui/material/AccordionDetails";
+import Divider from "@mui/material/Divider";
+import Stack from "@mui/material/Stack";
+import { ExpandMore } from "@mui/icons-material";
 import type {
   AdapterConfig,
   TubeSpec,
@@ -35,6 +30,46 @@ interface AdapterControlsProps {
   onChange: (config: AdapterConfig) => void;
 }
 
+function NumberField({
+  label,
+  value,
+  onChange,
+  min,
+  max,
+  step,
+  unit = "mm",
+}: {
+  label: string;
+  value: number;
+  onChange: (value: number) => void;
+  min?: number;
+  max?: number;
+  step?: number;
+  unit?: string;
+}) {
+  return (
+    <TextField
+      label={label}
+      type="number"
+      value={value}
+      onChange={(e) => onChange(Number(e.target.value))}
+      slotProps={{
+        htmlInput: { min, max, step },
+        input: {
+          endAdornment: (
+            <InputAdornment position="end">
+              <Typography variant="caption" color="text.secondary">
+                {unit}
+              </Typography>
+            </InputAdornment>
+          ),
+        },
+      }}
+      fullWidth
+    />
+  );
+}
+
 function TubeEndControls({
   label,
   tube,
@@ -44,8 +79,6 @@ function TubeEndControls({
   tube: TubeSpec;
   onChange: (tube: TubeSpec) => void;
 }) {
-  const [open, setOpen] = useState(true);
-
   const handleShapeChange = (shape: AdapterEndShape) => {
     if (shape === tube.shape) return;
 
@@ -65,192 +98,103 @@ function TubeEndControls({
   };
 
   return (
-    <Collapsible open={open} onOpenChange={setOpen}>
-      <CollapsibleTrigger className="flex w-full items-center justify-between py-2 text-sm font-medium hover:text-foreground text-foreground/80 transition-colors">
-        {label}
-        <ChevronDown
-          className={`h-4 w-4 transition-transform ${open ? "rotate-180" : ""}`}
-        />
-      </CollapsibleTrigger>
-      <CollapsibleContent className="space-y-4 pb-4">
-        {/* Shape Selection */}
-        <div className="space-y-2">
-          <Label className="text-xs text-muted-foreground">Tube Shape</Label>
-          <Select value={tube.shape} onValueChange={handleShapeChange}>
-            <SelectTrigger className="bg-muted/50 border-0">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="round">Round / Circular</SelectItem>
-              <SelectItem value="square">Square</SelectItem>
-              <SelectItem value="rectangular">Rectangular</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+    <Accordion defaultExpanded>
+      <AccordionSummary expandIcon={<ExpandMore />}>
+        <Typography variant="body2" fontWeight={500}>
+          {label}
+        </Typography>
+      </AccordionSummary>
+      <AccordionDetails>
+        <Stack spacing={2}>
+          {/* Shape Selection */}
+          <TextField
+            select
+            label="Tube Shape"
+            value={tube.shape}
+            onChange={(e) => handleShapeChange(e.target.value as AdapterEndShape)}
+            fullWidth
+          >
+            <MenuItem value="round">Round / Circular</MenuItem>
+            <MenuItem value="square">Square</MenuItem>
+            <MenuItem value="rectangular">Rectangular</MenuItem>
+          </TextField>
 
-        {/* Dimensions - specifying the TUBE that will connect */}
-        <p className="text-xs text-muted-foreground">
-          Enter the outer dimensions of the tube that will connect here.
-        </p>
+          {/* Dimensions */}
+          <Typography variant="caption" color="text.secondary">
+            Enter the outer dimensions of the tube that will connect here.
+          </Typography>
 
-        {tube.shape === "round" && (
-          <div className="space-y-1.5">
-            <Label className="text-xs text-muted-foreground">
-              Tube Outer Diameter
-            </Label>
-            <div className="relative">
-              <Input
-                type="number"
-                value={(tube as RoundTubeSpec).outerDiameter}
-                onChange={(e) =>
-                  onChange({
-                    ...tube,
-                    outerDiameter: Number(e.target.value),
-                  } as RoundTubeSpec)
+          {tube.shape === "round" && (
+            <NumberField
+              label="Tube Outer Diameter"
+              value={(tube as RoundTubeSpec).outerDiameter}
+              onChange={(v) =>
+                onChange({ ...tube, outerDiameter: v } as RoundTubeSpec)
+              }
+              min={1}
+            />
+          )}
+
+          {tube.shape === "square" && (
+            <>
+              <NumberField
+                label="Tube Outer Size"
+                value={(tube as SquareTubeSpec).outerSize}
+                onChange={(v) =>
+                  onChange({ ...tube, outerSize: v } as SquareTubeSpec)
                 }
-                className="bg-muted/50 border-0 pr-8"
                 min={1}
               />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
-                mm
-              </span>
-            </div>
-          </div>
-        )}
+              <NumberField
+                label="Corner Radius"
+                value={(tube as SquareTubeSpec).cornerRadius}
+                onChange={(v) =>
+                  onChange({ ...tube, cornerRadius: v } as SquareTubeSpec)
+                }
+                min={0}
+              />
+            </>
+          )}
 
-        {tube.shape === "square" && (
-          <>
-            <div className="space-y-1.5">
-              <Label className="text-xs text-muted-foreground">
-                Tube Outer Size
-              </Label>
-              <div className="relative">
-                <Input
-                  type="number"
-                  value={(tube as SquareTubeSpec).outerSize}
-                  onChange={(e) =>
-                    onChange({
-                      ...tube,
-                      outerSize: Number(e.target.value),
-                    } as SquareTubeSpec)
+          {tube.shape === "rectangular" && (
+            <>
+              <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1.5 }}>
+                <NumberField
+                  label="Tube Outer Width"
+                  value={(tube as RectangularTubeSpec).outerWidth}
+                  onChange={(v) =>
+                    onChange({ ...tube, outerWidth: v } as RectangularTubeSpec)
                   }
-                  className="bg-muted/50 border-0 pr-8"
                   min={1}
                 />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
-                  mm
-                </span>
-              </div>
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs text-muted-foreground">
-                Corner Radius
-              </Label>
-              <div className="relative">
-                <Input
-                  type="number"
-                  value={(tube as SquareTubeSpec).cornerRadius}
-                  onChange={(e) =>
-                    onChange({
-                      ...tube,
-                      cornerRadius: Number(e.target.value),
-                    } as SquareTubeSpec)
+                <NumberField
+                  label="Tube Outer Height"
+                  value={(tube as RectangularTubeSpec).outerHeight}
+                  onChange={(v) =>
+                    onChange({ ...tube, outerHeight: v } as RectangularTubeSpec)
                   }
-                  className="bg-muted/50 border-0 pr-8"
-                  min={0}
+                  min={1}
                 />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
-                  mm
-                </span>
-              </div>
-            </div>
-          </>
-        )}
-
-        {tube.shape === "rectangular" && (
-          <>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <Label className="text-xs text-muted-foreground">
-                  Tube Outer Width
-                </Label>
-                <div className="relative">
-                  <Input
-                    type="number"
-                    value={(tube as RectangularTubeSpec).outerWidth}
-                    onChange={(e) =>
-                      onChange({
-                        ...tube,
-                        outerWidth: Number(e.target.value),
-                      } as RectangularTubeSpec)
-                    }
-                    className="bg-muted/50 border-0 pr-8"
-                    min={1}
-                  />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
-                    mm
-                  </span>
-                </div>
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs text-muted-foreground">
-                  Tube Outer Height
-                </Label>
-                <div className="relative">
-                  <Input
-                    type="number"
-                    value={(tube as RectangularTubeSpec).outerHeight}
-                    onChange={(e) =>
-                      onChange({
-                        ...tube,
-                        outerHeight: Number(e.target.value),
-                      } as RectangularTubeSpec)
-                    }
-                    className="bg-muted/50 border-0 pr-8"
-                    min={1}
-                  />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
-                    mm
-                  </span>
-                </div>
-              </div>
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs text-muted-foreground">
-                Corner Radius
-              </Label>
-              <div className="relative">
-                <Input
-                  type="number"
-                  value={(tube as RectangularTubeSpec).cornerRadius}
-                  onChange={(e) =>
-                    onChange({
-                      ...tube,
-                      cornerRadius: Number(e.target.value),
-                    } as RectangularTubeSpec)
-                  }
-                  className="bg-muted/50 border-0 pr-8"
-                  min={0}
-                />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
-                  mm
-                </span>
-              </div>
-            </div>
-          </>
-        )}
-      </CollapsibleContent>
-    </Collapsible>
+              </Box>
+              <NumberField
+                label="Corner Radius"
+                value={(tube as RectangularTubeSpec).cornerRadius}
+                onChange={(v) =>
+                  onChange({ ...tube, cornerRadius: v } as RectangularTubeSpec)
+                }
+                min={0}
+              />
+            </>
+          )}
+        </Stack>
+      </AccordionDetails>
+    </Accordion>
   );
 }
 
 export function AdapterControls({ config, onChange }: AdapterControlsProps) {
-  const [adapterOpen, setAdapterOpen] = useState(true);
-  const [bendOpen, setBendOpen] = useState(true);
-  const [segmentOpen, setSegmentOpen] = useState(false);
-
   return (
-    <div className="space-y-1">
+    <Stack spacing={0.5}>
       {/* End A - Bottom socket */}
       <TubeEndControls
         label="Socket A (Bottom)"
@@ -258,7 +202,7 @@ export function AdapterControls({ config, onChange }: AdapterControlsProps) {
         onChange={(endA) => onChange({ ...config, endA })}
       />
 
-      <Separator />
+      <Divider />
 
       {/* End B - Top socket */}
       <TubeEndControls
@@ -267,182 +211,118 @@ export function AdapterControls({ config, onChange }: AdapterControlsProps) {
         onChange={(endB) => onChange({ ...config, endB })}
       />
 
-      <Separator />
+      <Divider />
 
       {/* Adapter Body Settings */}
-      <Collapsible open={adapterOpen} onOpenChange={setAdapterOpen}>
-        <CollapsibleTrigger className="flex w-full items-center justify-between py-2 text-sm font-medium hover:text-foreground text-foreground/80 transition-colors">
-          Adapter Body
-          <ChevronDown
-            className={`h-4 w-4 transition-transform ${adapterOpen ? "rotate-180" : ""}`}
-          />
-        </CollapsibleTrigger>
-        <CollapsibleContent className="space-y-4 pb-4">
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <Label className="text-xs text-muted-foreground">
-                Wall Thickness
-              </Label>
-              <div className="relative">
-                <Input
-                  type="number"
-                  value={config.wallThickness}
-                  onChange={(e) =>
-                    onChange({
-                      ...config,
-                      wallThickness: Number(e.target.value),
-                    })
-                  }
-                  className="bg-muted/50 border-0 pr-8"
-                  min={1}
-                  step={0.5}
-                />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
-                  mm
-                </span>
-              </div>
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs text-muted-foreground">
-                Socket Depth
-              </Label>
-              <div className="relative">
-                <Input
-                  type="number"
-                  value={config.socketDepth}
-                  onChange={(e) =>
-                    onChange({ ...config, socketDepth: Number(e.target.value) })
-                  }
-                  className="bg-muted/50 border-0 pr-8"
-                  min={5}
-                />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
-                  mm
-                </span>
-              </div>
-            </div>
-          </div>
-          <div className="space-y-1.5">
-            <Label className="text-xs text-muted-foreground">
-              Socket Clearance (fit tolerance)
-            </Label>
-            <div className="relative">
-              <Input
-                type="number"
-                value={config.socketClearance}
-                onChange={(e) =>
-                  onChange({
-                    ...config,
-                    socketClearance: Number(e.target.value),
-                  })
+      <Accordion defaultExpanded>
+        <AccordionSummary expandIcon={<ExpandMore />}>
+          <Typography variant="body2" fontWeight={500}>
+            Adapter Body
+          </Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          <Stack spacing={2}>
+            <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1.5 }}>
+              <NumberField
+                label="Wall Thickness"
+                value={config.wallThickness}
+                onChange={(v) =>
+                  onChange({ ...config, wallThickness: v })
                 }
-                className="bg-muted/50 border-0 pr-8"
-                min={0}
-                step={0.05}
+                min={1}
+                step={0.5}
               />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
-                mm
-              </span>
-            </div>
-            <p className="text-xs text-muted-foreground">
+              <NumberField
+                label="Socket Depth"
+                value={config.socketDepth}
+                onChange={(v) =>
+                  onChange({ ...config, socketDepth: v })
+                }
+                min={5}
+              />
+            </Box>
+            <NumberField
+              label="Socket Clearance (fit tolerance)"
+              value={config.socketClearance}
+              onChange={(v) =>
+                onChange({ ...config, socketClearance: v })
+              }
+              min={0}
+              step={0.05}
+            />
+            <Typography variant="caption" color="text.secondary">
               0.2mm for snug fit, 0.3mm for loose fit
-            </p>
-          </div>
-        </CollapsibleContent>
-      </Collapsible>
+            </Typography>
+          </Stack>
+        </AccordionDetails>
+      </Accordion>
 
-      <Separator />
+      <Divider />
 
       {/* Bend Settings */}
-      <Collapsible open={bendOpen} onOpenChange={setBendOpen}>
-        <CollapsibleTrigger className="flex w-full items-center justify-between py-2 text-sm font-medium hover:text-foreground text-foreground/80 transition-colors">
-          Elbow / Bend
-          <ChevronDown
-            className={`h-4 w-4 transition-transform ${bendOpen ? "rotate-180" : ""}`}
-          />
-        </CollapsibleTrigger>
-        <CollapsibleContent className="space-y-4 pb-4">
-          <div className="space-y-1.5">
-            <Label className="text-xs text-muted-foreground">Bend Angle</Label>
-            <div className="relative">
-              <Input
-                type="number"
-                value={config.bendAngle}
-                onChange={(e) =>
-                  onChange({ ...config, bendAngle: Number(e.target.value) })
-                }
-                className="bg-muted/50 border-0 pr-6"
-                min={0}
-                max={180}
-              />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
-                °
-              </span>
-            </div>
-            <p className="text-xs text-muted-foreground">
+      <Accordion defaultExpanded>
+        <AccordionSummary expandIcon={<ExpandMore />}>
+          <Typography variant="body2" fontWeight={500}>
+            Elbow / Bend
+          </Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          <Stack spacing={2}>
+            <NumberField
+              label="Bend Angle"
+              value={config.bendAngle}
+              onChange={(v) =>
+                onChange({ ...config, bendAngle: v })
+              }
+              min={0}
+              max={180}
+              unit="°"
+            />
+            <Typography variant="caption" color="text.secondary">
               0° = straight coupling, 45° = 45° elbow, 90° = 90° elbow
-            </p>
-          </div>
-          <div className="space-y-1.5">
-            <Label className="text-xs text-muted-foreground">
-              Bend Radius (0 = auto)
-            </Label>
-            <div className="relative">
-              <Input
-                type="number"
-                value={config.bendRadius}
-                onChange={(e) =>
-                  onChange({ ...config, bendRadius: Number(e.target.value) })
-                }
-                className="bg-muted/50 border-0 pr-8"
-                min={0}
-              />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
-                mm
-              </span>
-            </div>
-            <p className="text-xs text-muted-foreground">
+            </Typography>
+            <NumberField
+              label="Bend Radius (0 = auto)"
+              value={config.bendRadius}
+              onChange={(v) =>
+                onChange({ ...config, bendRadius: v })
+              }
+              min={0}
+            />
+            <Typography variant="caption" color="text.secondary">
               Leave at 0 to auto-calculate based on tube size
-            </p>
-          </div>
-        </CollapsibleContent>
-      </Collapsible>
-      <Separator />
+            </Typography>
+          </Stack>
+        </AccordionDetails>
+      </Accordion>
 
-      <Collapsible open={segmentOpen} onOpenChange={setSegmentOpen}>
-        <CollapsibleTrigger className="flex w-full items-center justify-between py-2 text-sm font-medium hover:text-foreground text-foreground/80 transition-colors">
-          Segments
-          <ChevronDown
-            className={`h-4 w-4 transition-transform ${segmentOpen ? "rotate-180" : ""}`}
-          />
-        </CollapsibleTrigger>
-        <CollapsibleContent className="space-y-4 pb-4">
-          <div className="space-y-1.5">
-            <Label className="text-xs text-muted-foreground">Amount of Segments</Label>
-            <div className="relative">
-              <Input
-                type="number"
-                value={config.segmentAmount}
-                onChange={(e) =>
-                  onChange({ ...config, segmentAmount: Number(e.target.value) })
-                }
-                className="bg-muted/50 border-0 pr-6"
-                min={4}
-              />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
-                °
-              </span>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Amount of Segments in a circle that the exported STL will have. Increasing this will increase the circular resolution at the expense of file size.
-            </p>
-          </div>
-        </CollapsibleContent>
-      </Collapsible>
-    </div>
+      <Divider />
+
+      <Accordion>
+        <AccordionSummary expandIcon={<ExpandMore />}>
+          <Typography variant="body2" fontWeight={500}>
+            Segments
+          </Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          <Stack spacing={2}>
+            <NumberField
+              label="Amount of Segments"
+              value={config.segmentAmount}
+              onChange={(v) =>
+                onChange({ ...config, segmentAmount: v })
+              }
+              min={4}
+              unit=""
+            />
+            <Typography variant="caption" color="text.secondary">
+              Amount of Segments in a circle that the exported STL will have.
+              Increasing this will increase the circular resolution at the
+              expense of file size.
+            </Typography>
+          </Stack>
+        </AccordionDetails>
+      </Accordion>
+    </Stack>
   );
-}
-
-function Separator() {
-  return <div className="border-t border-border my-2" />;
 }
