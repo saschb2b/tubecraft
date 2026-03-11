@@ -168,7 +168,8 @@ export default function Home() {
             display: "flex",
             alignItems: "center",
             gap: 1.5,
-            p: 2,
+            px: 2,
+            py: 1.5,
             borderBottom: 1,
             borderColor: "divider",
           }}
@@ -176,18 +177,18 @@ export default function Home() {
           <Box
             sx={{
               display: "flex",
-              height: 36,
-              width: 36,
+              height: 32,
+              width: 32,
               alignItems: "center",
               justifyContent: "center",
-              borderRadius: 2,
+              borderRadius: 1.5,
               bgcolor: "primary.main",
             }}
           >
-            <BoxIcon size={20} color="#ffffff" />
+            <BoxIcon size={18} color="#ffffff" />
           </Box>
           <Box>
-            <Typography variant="subtitle1" fontWeight={600}>
+            <Typography variant="subtitle2" fontWeight={600}>
               TubeCraft
             </Typography>
             <Typography variant="caption" color="text.secondary">
@@ -399,22 +400,19 @@ export default function Home() {
             bgcolor: "rgba(53, 53, 53, 0.3)",
             backdropFilter: "blur(12px)",
             px: 2,
-            py: 1.5,
+            py: 0.75,
           }}
         >
           <Stack
             direction="row"
             justifyContent="space-between"
             alignItems="center"
-            flexWrap="wrap"
-            useFlexGap
-            spacing={1}
           >
             <Stack direction="row" spacing={1.5} alignItems="center">
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="caption" color="text.secondary">
                 Made with{" "}
                 <Heart
-                  size={14}
+                  size={12}
                   color="#ef4444"
                   fill="#ef4444"
                   style={{ verticalAlign: "middle" }}
@@ -429,20 +427,12 @@ export default function Home() {
                 sx={{
                   display: "inline-flex",
                   alignItems: "center",
-                  gap: 0.75,
                   color: "text.secondary",
-                  textDecoration: "none",
                   "&:hover": { color: "text.primary" },
                   transition: "color 0.2s",
                 }}
               >
                 <GitHubIcon sx={{ fontSize: 16 }} />
-                <Typography
-                  variant="body2"
-                  sx={{ display: { xs: "none", sm: "inline" } }}
-                >
-                  Open Source
-                </Typography>
               </Box>
             </Stack>
             <Box
@@ -453,21 +443,20 @@ export default function Home() {
               sx={{
                 display: "inline-flex",
                 alignItems: "center",
-                gap: 1,
+                gap: 0.5,
                 color: "text.secondary",
                 textDecoration: "none",
                 "&:hover": { color: "text.primary" },
                 transition: "color 0.2s",
               }}
             >
-              <Coffee size={16} />
+              <Coffee size={14} />
               <Typography
-                variant="body2"
+                variant="caption"
                 sx={{ display: { xs: "none", sm: "inline" } }}
               >
-                Buy me a coffee
+                Support
               </Typography>
-              <ExternalLink size={12} />
             </Box>
           </Stack>
         </Box>

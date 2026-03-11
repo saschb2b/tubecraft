@@ -521,7 +521,7 @@ export function TubeControls({ config, onChange }: TubeControlsProps) {
                     variant="caption"
                     color="text.secondary"
                     textAlign="center"
-                    sx={{ fontSize: "0.65rem", lineHeight: 1.2 }}
+                    sx={{ lineHeight: 1.2 }}
                   >
                     Lead-in
                     <br />
@@ -547,7 +547,7 @@ export function TubeControls({ config, onChange }: TubeControlsProps) {
                     variant="caption"
                     color="text.secondary"
                     textAlign="center"
-                    sx={{ fontSize: "0.65rem", lineHeight: 1.2 }}
+                    sx={{ lineHeight: 1.2 }}
                   >
                     Stop
                     <br />
@@ -573,7 +573,7 @@ export function TubeControls({ config, onChange }: TubeControlsProps) {
                     variant="caption"
                     color="text.secondary"
                     textAlign="center"
-                    sx={{ fontSize: "0.65rem", lineHeight: 1.2 }}
+                    sx={{ lineHeight: 1.2 }}
                   >
                     Anti-
                     <br />
