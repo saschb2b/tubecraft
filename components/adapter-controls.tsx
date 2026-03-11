@@ -48,6 +48,7 @@ function NumberField({
     <TextField
       label={label}
       type="number"
+      size="small"
       value={value}
       onChange={(e) => onChange(Number(e.target.value))}
       slotProps={{
@@ -71,10 +72,12 @@ function TubeEndControls({
   label,
   tube,
   onChange,
+  defaultExpanded = true,
 }: {
   label: string;
   tube: TubeSpec;
   onChange: (tube: TubeSpec) => void;
+  defaultExpanded?: boolean;
 }) {
   const handleShapeChange = (shape: AdapterEndShape) => {
     if (shape === tube.shape) return;
@@ -95,18 +98,19 @@ function TubeEndControls({
   };
 
   return (
-    <Accordion defaultExpanded>
+    <Accordion defaultExpanded={defaultExpanded}>
       <AccordionSummary expandIcon={<ExpandMore />}>
         <Typography variant="body2" fontWeight={500}>
           {label}
         </Typography>
       </AccordionSummary>
       <AccordionDetails>
-        <Stack spacing={2}>
+        <Stack spacing={1.5}>
           {/* Shape Selection */}
           <TextField
             select
             label="Tube Shape"
+            size="small"
             value={tube.shape}
             onChange={(e) =>
               handleShapeChange(e.target.value as AdapterEndShape)
@@ -202,6 +206,7 @@ export function AdapterControls({ config, onChange }: AdapterControlsProps) {
         label="Socket B (Top)"
         tube={config.endB}
         onChange={(endB) => onChange({ ...config, endB })}
+        defaultExpanded
       />
 
       <Divider />
@@ -249,14 +254,14 @@ export function AdapterControls({ config, onChange }: AdapterControlsProps) {
       <Divider />
 
       {/* Bend Settings */}
-      <Accordion defaultExpanded>
+      <Accordion>
         <AccordionSummary expandIcon={<ExpandMore />}>
           <Typography variant="body2" fontWeight={500}>
             Elbow / Bend
           </Typography>
         </AccordionSummary>
         <AccordionDetails>
-          <Stack spacing={2}>
+          <Stack spacing={1.5}>
             <NumberField
               label="Bend Angle"
               value={config.bendAngle}
@@ -290,7 +295,7 @@ export function AdapterControls({ config, onChange }: AdapterControlsProps) {
           </Typography>
         </AccordionSummary>
         <AccordionDetails>
-          <Stack spacing={2}>
+          <Stack spacing={1.5}>
             <NumberField
               label="Amount of Segments"
               value={config.segmentAmount}

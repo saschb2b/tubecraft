@@ -130,6 +130,9 @@ export default function Home() {
         component="aside"
         sx={{
           width: { xs: "100%", lg: 320, xl: 384 },
+          height: { lg: "100vh" },
+          position: { lg: "sticky" },
+          top: 0,
           borderBottom: { xs: 1, lg: 0 },
           borderRight: { lg: 1 },
           borderColor: "divider",
