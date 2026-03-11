@@ -17,9 +17,31 @@ const theme = createTheme({
       primary: "#ffffff",
       secondary: "#d9d9d9",
     },
-    divider: "#4a4a4a",
+    divider: "#555555",
   },
   components: {
+    MuiTab: {
+      styleOverrides: {
+        root: {
+          color: "#999999",
+          "&.Mui-selected": {
+            color: "#ffffff",
+          },
+        },
+      },
+    },
+    MuiOutlinedInput: {
+      styleOverrides: {
+        root: {
+          "& .MuiOutlinedInput-notchedOutline": {
+            borderColor: "#555555",
+          },
+          "&:hover .MuiOutlinedInput-notchedOutline": {
+            borderColor: "#777777",
+          },
+        },
+      },
+    },
     MuiAccordion: {
       defaultProps: {
         disableGutters: true,

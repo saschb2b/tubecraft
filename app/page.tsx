@@ -177,7 +177,11 @@ export default function Home() {
           value={activeTab}
           onChange={(_, v: TabType) => setActiveTab(v)}
           variant="fullWidth"
-          sx={{ borderBottom: 1, borderColor: "divider" }}
+          sx={{
+            borderBottom: 1,
+            borderColor: "divider",
+            "& .MuiTabs-indicator": { height: 3 },
+          }}
         >
           <Tab
             icon={<BoxIcon size={16} />}
@@ -214,15 +218,20 @@ export default function Home() {
               size="large"
               fullWidth
               startIcon={<Download size={16} />}
+              sx={{
+                bgcolor: "#3c6e71",
+                "&:hover": { bgcolor: "#4a8a8d" },
+              }}
             >
               Download STL
             </Button>
             <Button
               onClick={handleReset}
-              variant="outlined"
+              variant="text"
               size="small"
               fullWidth
               startIcon={<RotateCcw size={14} />}
+              sx={{ color: "#d9d9d9" }}
             >
               Reset to Default
             </Button>
