@@ -65,15 +65,34 @@ function NumberField({
   );
 }
 
-function SectionHeader({ children }: { children: React.ReactNode }) {
+function SectionCard({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
   return (
-    <Typography
-      variant="overline"
-      color="text.secondary"
-      sx={{ letterSpacing: 1 }}
-    >
-      {children}
-    </Typography>
+    <Stack spacing={1}>
+      <Typography
+        variant="overline"
+        color="text.secondary"
+        sx={{ letterSpacing: 1 }}
+      >
+        {title}
+      </Typography>
+      <Box
+        sx={{
+          bgcolor: "rgba(255,255,255,0.03)",
+          borderRadius: 1.5,
+          border: "1px solid",
+          borderColor: "divider",
+          p: 1.5,
+        }}
+      >
+        <Stack spacing={1.5}>{children}</Stack>
+      </Box>
+    </Stack>
   );
 }
 
@@ -105,8 +124,7 @@ function TubeEndSection({
   };
 
   return (
-    <Stack spacing={1}>
-      <SectionHeader>{label}</SectionHeader>
+    <SectionCard title={label}>
       <TextField
         select
         label="Tube Shape"
@@ -121,10 +139,6 @@ function TubeEndSection({
         <MenuItem value="square">Square</MenuItem>
         <MenuItem value="rectangular">Rectangular</MenuItem>
       </TextField>
-
-      <Typography variant="caption" color="text.secondary">
-        Enter the outer dimensions of the tube that will connect here.
-      </Typography>
 
       {tube.shape === "round" && (
         <NumberField
@@ -153,36 +167,34 @@ function TubeEndSection({
       )}
 
       {tube.shape === "rectangular" && (
-        <>
-          <Box
-            sx={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: 1.5,
-            }}
-          >
-            <NumberField
-              label="Tube Outer Width"
-              value={tube.outerWidth}
-              onChange={(v) => onChange({ ...tube, outerWidth: v })}
-              min={1}
-            />
-            <NumberField
-              label="Tube Outer Height"
-              value={tube.outerHeight}
-              onChange={(v) => onChange({ ...tube, outerHeight: v })}
-              min={1}
-            />
-          </Box>
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: 1.5,
+          }}
+        >
+          <NumberField
+            label="Tube Outer Width"
+            value={tube.outerWidth}
+            onChange={(v) => onChange({ ...tube, outerWidth: v })}
+            min={1}
+          />
+          <NumberField
+            label="Tube Outer Height"
+            value={tube.outerHeight}
+            onChange={(v) => onChange({ ...tube, outerHeight: v })}
+            min={1}
+          />
           <NumberField
             label="Corner Radius"
             value={tube.cornerRadius}
             onChange={(v) => onChange({ ...tube, cornerRadius: v })}
             min={0}
           />
-        </>
+        </Box>
       )}
-    </Stack>
+    </SectionCard>
   );
 }
 
@@ -204,8 +216,7 @@ export function AdapterControls({ config, onChange }: AdapterControlsProps) {
       />
 
       {/* Adapter Body */}
-      <Stack spacing={1}>
-        <SectionHeader>Adapter Body</SectionHeader>
+      <SectionCard title="Adapter Body">
         <Box
           sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1.5 }}
         >
@@ -224,58 +235,55 @@ export function AdapterControls({ config, onChange }: AdapterControlsProps) {
           />
         </Box>
         <NumberField
-          label="Socket Clearance (fit tolerance)"
+          label="Socket Clearance"
           value={config.socketClearance}
           onChange={(v) => onChange({ ...config, socketClearance: v })}
           min={0}
           step={0.05}
         />
         <Typography variant="caption" color="text.secondary">
-          0.2mm for snug fit, 0.3mm for loose fit
+          0.2mm snug, 0.3mm loose
         </Typography>
-      </Stack>
+      </SectionCard>
 
       {/* Elbow / Bend */}
-      <Stack spacing={1}>
-        <SectionHeader>Elbow / Bend</SectionHeader>
-        <NumberField
-          label="Bend Angle"
-          value={config.bendAngle}
-          onChange={(v) => onChange({ ...config, bendAngle: v })}
-          min={0}
-          max={180}
-          unit="°"
-        />
+      <SectionCard title="Elbow / Bend">
+        <Box
+          sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1.5 }}
+        >
+          <NumberField
+            label="Bend Angle"
+            value={config.bendAngle}
+            onChange={(v) => onChange({ ...config, bendAngle: v })}
+            min={0}
+            max={180}
+            unit="°"
+          />
+          <NumberField
+            label="Bend Radius"
+            value={config.bendRadius}
+            onChange={(v) => onChange({ ...config, bendRadius: v })}
+            min={0}
+          />
+        </Box>
         <Typography variant="caption" color="text.secondary">
-          0° = straight coupling, 45° = 45° elbow, 90° = 90° elbow
+          0° = straight, 90° = elbow. Radius 0 = auto
         </Typography>
-        <NumberField
-          label="Bend Radius (0 = auto)"
-          value={config.bendRadius}
-          onChange={(v) => onChange({ ...config, bendRadius: v })}
-          min={0}
-        />
-        <Typography variant="caption" color="text.secondary">
-          Leave at 0 to auto-calculate based on tube size
-        </Typography>
-      </Stack>
+      </SectionCard>
 
       {/* Segments */}
-      <Stack spacing={1}>
-        <SectionHeader>Segments</SectionHeader>
+      <SectionCard title="Resolution">
         <NumberField
-          label="Amount of Segments"
+          label="Segments"
           value={config.segmentAmount}
           onChange={(v) => onChange({ ...config, segmentAmount: v })}
           min={4}
           unit=""
         />
         <Typography variant="caption" color="text.secondary">
-          Amount of Segments in a circle that the exported STL will have.
-          Increasing this will increase the circular resolution at the expense of
-          file size.
+          Circular segments in exported STL. More = smoother but larger file.
         </Typography>
-      </Stack>
+      </SectionCard>
     </Stack>
   );
 }
