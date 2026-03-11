@@ -4,10 +4,12 @@ import { Canvas } from "@react-three/fiber";
 import {
   OrbitControls,
   Environment,
+  Grid,
   GizmoHelper,
   GizmoViewport,
   ContactShadows,
-  Html,
+  Line,
+  Text,
 } from "@react-three/drei";
 import { useMemo } from "react";
 import * as THREE from "three";
@@ -376,70 +378,135 @@ function AdapterMesh({ config }: { config: AdapterConfig }) {
         metalness={0.85}
         roughness={0.15}
         side={THREE.DoubleSide}
+        envMapIntensity={1.2}
       />
     </mesh>
   );
 }
 
-function Grid() {
-  const gridSize = 200;
-  const divisions = 20;
+
+function HorizontalDimension({
+  width,
+  y,
+  z,
+  label,
+  color = "#f59e0b",
+  labelPosition = "above",
+}: {
+  width: number;
+  y: number;
+  z: number;
+  label: string;
+  color?: string;
+  labelPosition?: "above" | "below";
+}) {
+  const halfWidth = width / 2;
+  const tickSize = Math.max(2, width * 0.06);
+  const textSize = Math.max(3, width * 0.08);
+  const textY =
+    labelPosition === "above"
+      ? y + tickSize + textSize
+      : y - tickSize - textSize;
+
   return (
-    <group position={[0, 0, 0]}>
-      <gridHelper args={[gridSize, divisions, "#6a6a6a", "#444444"]} />
-      <line>
-        <bufferGeometry>
-          <bufferAttribute
-            attach="attributes-position"
-            args={[
-              new Float32Array([-gridSize / 2, 0.01, 0, gridSize / 2, 0.01, 0]),
-              3,
-            ]}
-          />
-        </bufferGeometry>
-        <lineBasicMaterial color="#ef4444" />
-      </line>
-      <line>
-        <bufferGeometry>
-          <bufferAttribute
-            attach="attributes-position"
-            args={[
-              new Float32Array([0, 0.01, -gridSize / 2, 0, 0.01, gridSize / 2]),
-              3,
-            ]}
-          />
-        </bufferGeometry>
-        <lineBasicMaterial color="#3b82f6" />
-      </line>
+    <group>
+      <Line
+        points={[
+          [-halfWidth, y, z],
+          [halfWidth, y, z],
+        ]}
+        color={color}
+        lineWidth={1.5}
+      />
+      <Line
+        points={[
+          [-halfWidth, y - tickSize, z],
+          [-halfWidth, y + tickSize, z],
+        ]}
+        color={color}
+        lineWidth={1.5}
+      />
+      <Line
+        points={[
+          [halfWidth, y - tickSize, z],
+          [halfWidth, y + tickSize, z],
+        ]}
+        color={color}
+        lineWidth={1.5}
+      />
+      <Text
+        position={[0, textY, z]}
+        fontSize={textSize}
+        color={color}
+        anchorX="center"
+        anchorY="middle"
+      >
+        {label}
+      </Text>
     </group>
   );
 }
 
-function DimensionLabel({
-  position,
-  text,
-  color,
+function VerticalDimension({
+  height,
+  x,
+  z,
+  startY,
+  label,
+  color = "#f59e0b",
+  labelSide = "right",
 }: {
-  position: [number, number, number];
-  text: string;
-  color: string;
+  height: number;
+  x: number;
+  z: number;
+  startY: number;
+  label: string;
+  color?: string;
+  labelSide?: "left" | "right";
 }) {
+  const tickSize = Math.max(2, height * 0.04);
+  const textSize = Math.max(3, height * 0.06);
+  const textX =
+    labelSide === "right"
+      ? x + tickSize + textSize * 2
+      : x - tickSize - textSize * 2;
+
   return (
-    <Html position={position} center style={{ pointerEvents: "none" }}>
-      <div
-        style={{
-          fontSize: "0.75rem",
-          fontFamily: "monospace",
-          padding: "2px 6px",
-          borderRadius: 4,
-          whiteSpace: "nowrap",
-          color,
-          textShadow: "0 1px 2px rgba(0,0,0,0.8)",
-        }}
+    <group>
+      <Line
+        points={[
+          [x, startY, z],
+          [x, startY + height, z],
+        ]}
+        color={color}
+        lineWidth={1.5}
+      />
+      <Line
+        points={[
+          [x - tickSize, startY, z],
+          [x + tickSize, startY, z],
+        ]}
+        color={color}
+        lineWidth={1.5}
+      />
+      <Line
+        points={[
+          [x - tickSize, startY + height, z],
+          [x + tickSize, startY + height, z],
+        ]}
+        color={color}
+        lineWidth={1.5}
+      />
+      <Text
+        position={[textX, startY + height / 2, z]}
+        fontSize={textSize}
+        color={color}
+        anchorX={labelSide === "right" ? "left" : "right"}
+        anchorY="middle"
       >
-        {text}
-      </div>
-    </Html>
+        {label}
+      </Text>
+    </group>
   );
 }
 
@@ -455,63 +522,79 @@ function DimensionIndicators({ config }: { config: AdapterConfig }) {
   const straightLength = config.bendAngle === 0 ? bendRadius : 0;
 
   const yOffset = config.socketDepth;
+  const maxOuterWidth = Math.max(adapterA.width, adapterA.height);
+  const xOffset = maxOuterWidth / 2 + 12;
 
   // Calculate end B position
   const endAngleRad = (config.bendAngle * Math.PI) / 180;
   let endBY: number;
-  let endBZ: number;
 
   if (config.bendAngle > 0) {
     endBY =
       bendRadius * Math.sin(endAngleRad) +
       config.socketDepth * Math.cos(endAngleRad) +
       yOffset;
-    endBZ =
-      bendRadius * (1 - Math.cos(endAngleRad)) +
-      config.socketDepth * Math.sin(endAngleRad);
   } else {
     endBY = straightLength + config.socketDepth + yOffset;
-    endBZ = 0;
   }
 
   return (
     <group>
-      {/* Socket A - tube diameter */}
-      <DimensionLabel
-        position={[
-          adapterA.width / 2 + 20,
-          yOffset - config.socketDepth / 2,
-          0,
-        ]}
-        text={`⌀${dimA.width}mm tube`}
+      {/* Socket A - tube diameter (horizontal line across bottom) */}
+      <HorizontalDimension
+        width={dimA.width}
+        y={-6}
+        z={maxOuterWidth / 2 + 5}
+        label={`⌀${dimA.width}mm`}
         color="#3b82f6"
+        labelPosition="below"
       />
 
-      {/* Socket B - tube diameter */}
-      <DimensionLabel
-        position={[adapterA.width / 2 + 20, endBY, endBZ]}
-        text={`⌀${dimB.width}mm tube`}
+      {/* Socket B - tube diameter (horizontal line across top) */}
+      <HorizontalDimension
+        width={dimB.width}
+        y={endBY + 6}
+        z={0}
+        label={`⌀${dimB.width}mm`}
         color="#22c55e"
       />
 
-      {/* Socket depth */}
-      <DimensionLabel
-        position={[
-          -adapterA.width / 2 - 15,
-          yOffset - config.socketDepth / 2,
-          0,
-        ]}
-        text={`${config.socketDepth}mm socket`}
+      {/* Socket depth A (vertical line on left side) */}
+      <VerticalDimension
+        height={config.socketDepth}
+        x={-xOffset}
+        z={0}
+        startY={0}
+        label={`${config.socketDepth}mm`}
+        color="#f59e0b"
+        labelSide="left"
+      />
+
+      {/* Total height (vertical line on right side) */}
+      <VerticalDimension
+        height={endBY}
+        x={xOffset}
+        z={0}
+        startY={0}
+        label={`${Math.round(endBY)}mm`}
         color="#f59e0b"
       />
 
-      {/* Bend angle - only show when bent */}
+      {/* Bend angle label */}
       {config.bendAngle > 0 && (
-        <DimensionLabel
-          position={[0, bendRadius * 0.5 + yOffset, bendRadius * 0.3]}
-          text={`${config.bendAngle}° elbow`}
+        <Text
+          position={[
+            -xOffset - 8,
+            bendRadius * 0.5 + yOffset,
+            bendRadius * 0.3,
+          ]}
+          fontSize={Math.max(3, bendRadius * 0.06)}
           color="#a855f7"
-        />
+          anchorX="right"
+          anchorY="middle"
+        >
+          {config.bendAngle}° elbow
+        </Text>
       )}
     </group>
   );

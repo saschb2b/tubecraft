@@ -73,14 +73,19 @@ function HorizontalDimension({
   z,
   label,
   color = "#f59e0b",
+  labelPosition = "above",
 }: {
   width: number;
   y: number;
   z: number;
   label: string;
   color?: string;
+  labelPosition?: "above" | "below";
 }) {
   const halfWidth = width / 2;
+  const textSize = Math.max(4, width * 0.1);
+  const textY =
+    labelPosition === "above" ? y + 5 : y - 5 - textSize * 0.5;
 
   return (
     <group>
@@ -109,8 +114,8 @@ function HorizontalDimension({
         lineWidth={1.5}
       />
       <Text
-        position={[0, y + 5, z]}
-        fontSize={Math.max(4, width * 0.1)}
+        position={[0, textY, z]}
+        fontSize={textSize}
         color={color}
         anchorX="center"
         anchorY="middle"
@@ -276,6 +281,7 @@ function DimensionIndicators({ config }: { config: TubeConfig }) {
         z={outerHeight / 2 + 5}
         label={isRound ? `⌀${outerWidth}` : outerWidth.toString()}
         color="#3b82f6"
+        labelPosition="below"
       />
 
       <HorizontalDimension
@@ -413,6 +419,7 @@ function DimensionIndicators({ config }: { config: TubeConfig }) {
           z={0}
           label={`Target ⌀${config.bottomCut.targetDiameter}`}
           color="#f97316"
+          labelPosition="below"
         />
       )}
     </group>
@@ -1014,6 +1021,8 @@ export function TubePreview({ config }: TubePreviewProps) {
 
       <OrbitControls
         makeDefault
+        enableDamping
+        dampingFactor={0.05}
         minDistance={maxDimension * 0.5}
         maxDistance={maxDimension * 5}
         target={[0, config.length / 2, 0]}
