@@ -8,9 +8,9 @@ import Typography from "@mui/material/Typography";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import Chip from "@mui/material/Chip";
-import Dialog from "@mui/material/Dialog";
-import DialogTitle from "@mui/material/DialogTitle";
-import DialogContent from "@mui/material/DialogContent";
+import Drawer from "@mui/material/Drawer";
+import IconButton from "@mui/material/IconButton";
+import Divider from "@mui/material/Divider";
 import Stack from "@mui/material/Stack";
 import { TubePreview } from "@/components/tube-preview";
 import { TubeControls } from "@/components/tube-controls";
@@ -28,8 +28,14 @@ import {
   Box as BoxIcon,
   Coffee,
   Heart,
-  ExternalLink,
   Link2,
+  X,
+  Star,
+  ExternalLink,
+  Printer,
+  Layers,
+  Thermometer,
+  Gauge,
 } from "lucide-react";
 import GitHubIcon from "@mui/icons-material/GitHub";
 
@@ -243,10 +249,7 @@ export default function Home() {
               size="large"
               fullWidth
               startIcon={<Download size={16} />}
-              sx={{
-                bgcolor: "#3c6e71",
-                "&:hover": { bgcolor: "#4a8a8d" },
-              }}
+              color="primary"
             >
               Download STL
             </Button>
@@ -462,37 +465,78 @@ export default function Home() {
         </Box>
       </Box>
 
-      <Dialog
+      <Drawer
+        anchor="right"
         open={showThankYou}
         onClose={() => setShowThankYou(false)}
-        maxWidth="sm"
-        fullWidth
       >
-        <DialogTitle sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <Download size={20} color="#3c6e71" />
-          Download Started!
-        </DialogTitle>
-        <DialogContent>
-          <Stack spacing={2.5}>
-            <Typography>
-              Your STL file is ready for 3D printing. Thank you for using
-              TubeCraft!
-            </Typography>
-            <Box
-              sx={{
-                bgcolor: "rgba(62, 62, 62, 0.5)",
-                borderRadius: 2,
-                p: 2.5,
-              }}
+        <Box sx={{ width: 320, p: 3 }}>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              mb: 2,
+            }}
+          >
+            <Typography variant="h6">Download Started!</Typography>
+            <IconButton
+              size="small"
+              onClick={() => setShowThankYou(false)}
             >
-              <Typography
-                variant="body2"
-                color="text.secondary"
-                sx={{ mb: 1.5 }}
-              >
-                If you find TubeCraft useful, consider supporting the project:
+              <X size={18} />
+            </IconButton>
+          </Box>
+
+          <Stack spacing={2.5}>
+            <Typography variant="body2" color="text.secondary">
+              Your STL file is ready for 3D printing.
+            </Typography>
+
+            <Divider />
+
+            <Box>
+              <Typography variant="overline" color="text.secondary">
+                Print Tips
               </Typography>
-              <Stack direction="row" spacing={1}>
+              <Stack spacing={1.5} sx={{ mt: 1 }}>
+                <Stack direction="row" spacing={1.5} alignItems="flex-start">
+                  <Layers size={16} color="#5a9a9d" style={{ marginTop: 2, flexShrink: 0 }} />
+                  <Typography variant="caption" color="text.secondary">
+                    <strong>Layer height:</strong> 0.2mm for a good balance of speed and quality. Use 0.12mm for press-fit parts.
+                  </Typography>
+                </Stack>
+                <Stack direction="row" spacing={1.5} alignItems="flex-start">
+                  <Gauge size={16} color="#5a9a9d" style={{ marginTop: 2, flexShrink: 0 }} />
+                  <Typography variant="caption" color="text.secondary">
+                    <strong>Infill:</strong> 20-30% is usually enough. Use 50%+ for structural joints.
+                  </Typography>
+                </Stack>
+                <Stack direction="row" spacing={1.5} alignItems="flex-start">
+                  <Thermometer size={16} color="#5a9a9d" style={{ marginTop: 2, flexShrink: 0 }} />
+                  <Typography variant="caption" color="text.secondary">
+                    <strong>Material:</strong> PETG for durability and heat resistance. PLA works for prototyping.
+                  </Typography>
+                </Stack>
+                <Stack direction="row" spacing={1.5} alignItems="flex-start">
+                  <Printer size={16} color="#5a9a9d" style={{ marginTop: 2, flexShrink: 0 }} />
+                  <Typography variant="caption" color="text.secondary">
+                    <strong>Orientation:</strong> Print upright for best layer adhesion along the tube walls.
+                  </Typography>
+                </Stack>
+              </Stack>
+            </Box>
+
+            <Divider />
+
+            <Box>
+              <Typography variant="overline" color="text.secondary">
+                Support the project
+              </Typography>
+              <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, mb: 1.5, display: "block" }}>
+                TubeCraft is free and open source. If it saved you time, consider giving back!
+              </Typography>
+              <Stack spacing={1.5}>
                 <Button
                   component="a"
                   href="https://github.com/saschb2b/tubecraft"
@@ -500,8 +544,8 @@ export default function Home() {
                   rel="noopener noreferrer"
                   variant="outlined"
                   fullWidth
-                  startIcon={<GitHubIcon sx={{ fontSize: 20 }} />}
-                  endIcon={<ExternalLink size={16} />}
+                  startIcon={<Star size={18} />}
+                  endIcon={<ExternalLink size={14} />}
                 >
                   Star on GitHub
                 </Button>
@@ -510,29 +554,18 @@ export default function Home() {
                   href="https://buymeacoffee.com/qohreuukw"
                   target="_blank"
                   rel="noopener noreferrer"
+                  variant="contained"
                   fullWidth
-                  startIcon={<Coffee size={20} />}
-                  endIcon={<ExternalLink size={16} />}
-                  sx={{
-                    bgcolor: "#FFDD00",
-                    color: "#000",
-                    "&:hover": { bgcolor: "#e6c700" },
-                  }}
+                  startIcon={<Coffee size={18} />}
+                  endIcon={<ExternalLink size={14} />}
                 >
                   Buy me a coffee
                 </Button>
               </Stack>
             </Box>
-            <Typography
-              variant="caption"
-              color="text.secondary"
-              textAlign="center"
-            >
-              Your support helps keep TubeCraft free and open source
-            </Typography>
           </Stack>
-        </DialogContent>
-      </Dialog>
+        </Box>
+      </Drawer>
     </Box>
   );
 }
