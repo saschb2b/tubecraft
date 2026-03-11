@@ -28,10 +28,10 @@ function GridFloor({ size }: { size: number }) {
         args={[gridSize, gridSize]}
         cellSize={10}
         cellThickness={0.5}
-        cellColor="#475569"
+        cellColor="#555555"
         sectionSize={50}
         sectionThickness={1}
-        sectionColor="#64748b"
+        sectionColor="#6a6a6a"
         fadeDistance={gridSize * 2}
         fadeStrength={1}
         followCamera={false}
@@ -987,7 +987,7 @@ export function TubePreview({ config }: TubePreviewProps) {
         far: maxDimension * 20,
       }}
       style={{
-        background: "linear-gradient(180deg, #e2e8f0 0%, #94a3b8 100%)",
+        background: "linear-gradient(180deg, #404040 0%, #2a2a2a 100%)",
       }}
     >
       <Environment preset="studio" />

@@ -160,7 +160,7 @@ export default function Home() {
               bgcolor: "primary.main",
             }}
           >
-            <BoxIcon size={20} color="#1a1b2e" />
+            <BoxIcon size={20} color="#ffffff" />
           </Box>
           <Box>
             <Typography variant="subtitle1" fontWeight={600}>
@@ -248,7 +248,7 @@ export default function Home() {
             justifyContent: "space-between",
             borderBottom: 1,
             borderColor: "divider",
-            bgcolor: "rgba(36, 37, 56, 0.5)",
+            bgcolor: "rgba(53, 53, 53, 0.5)",
             px: 2,
             py: 1,
           }}
@@ -363,7 +363,7 @@ export default function Home() {
           sx={{
             borderTop: 1,
             borderColor: "divider",
-            bgcolor: "rgba(36, 37, 56, 0.3)",
+            bgcolor: "rgba(53, 53, 53, 0.3)",
             backdropFilter: "blur(12px)",
             px: 2,
             py: 1.5,
@@ -447,7 +447,7 @@ export default function Home() {
         fullWidth
       >
         <DialogTitle sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <Download size={20} color="#34d399" />
+          <Download size={20} color="#3c6e71" />
           Download Started!
         </DialogTitle>
         <DialogContent>
@@ -458,7 +458,7 @@ export default function Home() {
             </Typography>
             <Box
               sx={{
-                bgcolor: "rgba(45, 46, 70, 0.5)",
+                bgcolor: "rgba(62, 62, 62, 0.5)",
                 borderRadius: 2,
                 p: 2.5,
               }}
