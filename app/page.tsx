@@ -127,6 +127,14 @@ export default function Home() {
       });
     }
 
+    if (adapterConfig.endAFit !== "socket" || adapterConfig.endBFit !== "socket") {
+      const fitLabel = `A: ${adapterConfig.endAFit} / B: ${adapterConfig.endBFit}`;
+      badges.push({
+        label: fitLabel,
+        color: "#ec4899",
+      });
+    }
+
     if (adapterConfig.bendAngle > 0) {
       badges.push({
         label: `${String(adapterConfig.bendAngle)}° elbow`,

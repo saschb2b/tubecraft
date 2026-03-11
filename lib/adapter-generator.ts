@@ -1,5 +1,8 @@
-import type { AdapterConfig, TubeSpec } from "./adapter-types";
-import { getEffectiveBendRadius } from "./adapter-types";
+import type { AdapterConfig, TubeSpec, FitType } from "./adapter-types";
+import {
+  getEffectiveBendRadius,
+  getTubeInnerDimensions,
+} from "./adapter-types";
 
 // Helper to round vertices
 function roundVertex(v: number, precision = 6): number {
@@ -101,12 +104,41 @@ function generateRoundedRectProfile(
   return points;
 }
 
-// Get socket profile (inner surface where tube slides in)
-function getSocketProfile(
+// Get inner profile of the adapter at a given end
+function getInnerProfile(
   tube: TubeSpec,
   clearance: number,
+  wallThickness: number,
+  fitType: FitType,
   segments: number,
 ): { x: number; z: number }[] {
+  if (fitType === "plug") {
+    // Plug inner = plug outer - wall thickness
+    const inner = getTubeInnerDimensions(tube);
+    const plugOuterW = inner.width - clearance * 2;
+    const plugOuterH = inner.height - clearance * 2;
+    const plugInnerW = plugOuterW - wallThickness * 2;
+    const plugInnerH = plugOuterH - wallThickness * 2;
+    switch (tube.shape) {
+      case "round":
+        return generateRoundProfile(plugInnerW, segments);
+      case "square":
+        return generateRoundedRectProfile(
+          plugInnerW,
+          plugInnerH,
+          Math.max(0, tube.cornerRadius - wallThickness),
+          segments / 4,
+        );
+      case "rectangular":
+        return generateRoundedRectProfile(
+          plugInnerW,
+          plugInnerH,
+          Math.max(0, tube.cornerRadius - wallThickness),
+          segments / 4,
+        );
+    }
+  }
+  // Socket: inner = tube outer + clearance
   switch (tube.shape) {
     case "round":
       return generateRoundProfile(tube.outerDiameter + clearance * 2, segments);
@@ -127,13 +159,39 @@ function getSocketProfile(
   }
 }
 
-// Get outer profile (outer surface of adapter)
+// Get outer profile of the adapter at a given end
 function getOuterProfile(
   tube: TubeSpec,
   clearance: number,
   wallThickness: number,
+  fitType: FitType,
   segments: number,
 ): { x: number; z: number }[] {
+  if (fitType === "plug") {
+    // Plug outer = tube inner - clearance
+    const inner = getTubeInnerDimensions(tube);
+    const plugOuterW = inner.width - clearance * 2;
+    const plugOuterH = inner.height - clearance * 2;
+    switch (tube.shape) {
+      case "round":
+        return generateRoundProfile(plugOuterW, segments);
+      case "square":
+        return generateRoundedRectProfile(
+          plugOuterW,
+          plugOuterH,
+          tube.cornerRadius,
+          segments / 4,
+        );
+      case "rectangular":
+        return generateRoundedRectProfile(
+          plugOuterW,
+          plugOuterH,
+          tube.cornerRadius,
+          segments / 4,
+        );
+    }
+  }
+  // Socket: outer = tube outer + clearance + wall
   switch (tube.shape) {
     case "round":
       return generateRoundProfile(
@@ -235,21 +293,13 @@ export function generateAdapterSTL(config: AdapterConfig): ArrayBuffer {
 
   const triangles: number[][] = [];
 
+  const { endAFit, endBFit } = config;
+
   // Get profiles for both ends
-  const innerProfileA = getSocketProfile(endA, socketClearance, segments);
-  const outerProfileA = getOuterProfile(
-    endA,
-    socketClearance,
-    wallThickness,
-    segments,
-  );
-  const innerProfileB = getSocketProfile(endB, socketClearance, segments);
-  const outerProfileB = getOuterProfile(
-    endB,
-    socketClearance,
-    wallThickness,
-    segments,
-  );
+  const innerProfileA = getInnerProfile(endA, socketClearance, wallThickness, endAFit, segments);
+  const outerProfileA = getOuterProfile(endA, socketClearance, wallThickness, endAFit, segments);
+  const innerProfileB = getInnerProfile(endB, socketClearance, wallThickness, endBFit, segments);
+  const outerProfileB = getOuterProfile(endB, socketClearance, wallThickness, endBFit, segments);
 
   const numPoints = Math.max(
     innerProfileA.length,

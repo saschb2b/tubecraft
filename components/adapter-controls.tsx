@@ -12,6 +12,7 @@ import type {
   AdapterConfig,
   TubeSpec,
   AdapterEndShape,
+  FitType,
 } from "@/lib/adapter-types";
 import {
   DEFAULT_ROUND_TUBE,
@@ -99,11 +100,15 @@ function SectionCard({
 function TubeEndSection({
   label,
   tube,
-  onChange,
+  fitType,
+  onTubeChange,
+  onFitChange,
 }: {
   label: string;
   tube: TubeSpec;
-  onChange: (tube: TubeSpec) => void;
+  fitType: FitType;
+  onTubeChange: (tube: TubeSpec) => void;
+  onFitChange: (fit: FitType) => void;
 }) {
   const handleShapeChange = (shape: AdapterEndShape) => {
     if (shape === tube.shape) return;
@@ -120,33 +125,57 @@ function TubeEndSection({
         newTube = { ...DEFAULT_RECTANGULAR_TUBE };
         break;
     }
-    onChange(newTube);
+    onTubeChange(newTube);
   };
 
   return (
     <SectionCard title={label}>
-      <TextField
-        select
-        label="Tube Shape"
-        size="small"
-        value={tube.shape}
-        onChange={(e) =>
-          handleShapeChange(e.target.value as AdapterEndShape)
-        }
-        fullWidth
-      >
-        <MenuItem value="round">Round / Circular</MenuItem>
-        <MenuItem value="square">Square</MenuItem>
-        <MenuItem value="rectangular">Rectangular</MenuItem>
-      </TextField>
+      <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1.5 }}>
+        <TextField
+          select
+          label="Tube Shape"
+          size="small"
+          value={tube.shape}
+          onChange={(e) =>
+            handleShapeChange(e.target.value as AdapterEndShape)
+          }
+          fullWidth
+        >
+          <MenuItem value="round">Round</MenuItem>
+          <MenuItem value="square">Square</MenuItem>
+          <MenuItem value="rectangular">Rectangular</MenuItem>
+        </TextField>
+        <TextField
+          select
+          label="Fit Type"
+          size="small"
+          value={fitType}
+          onChange={(e) => onFitChange(e.target.value as FitType)}
+          fullWidth
+        >
+          <MenuItem value="socket">Socket (outside)</MenuItem>
+          <MenuItem value="plug">Plug (inside)</MenuItem>
+        </TextField>
+      </Box>
 
       {tube.shape === "round" && (
-        <NumberField
-          label="Tube Outer Diameter"
-          value={tube.outerDiameter}
-          onChange={(v) => onChange({ ...tube, outerDiameter: v })}
-          min={1}
-        />
+        <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1.5 }}>
+          <NumberField
+            label="Tube Outer Diameter"
+            value={tube.outerDiameter}
+            onChange={(v) => onTubeChange({ ...tube, outerDiameter: v })}
+            min={1}
+          />
+          {fitType === "plug" && (
+            <NumberField
+              label="Tube Wall Thickness"
+              value={tube.tubeWallThickness}
+              onChange={(v) => onTubeChange({ ...tube, tubeWallThickness: v })}
+              min={0.5}
+              step={0.5}
+            />
+          )}
+        </Box>
       )}
 
       {tube.shape === "square" && (
@@ -154,15 +183,24 @@ function TubeEndSection({
           <NumberField
             label="Tube Outer Size"
             value={tube.outerSize}
-            onChange={(v) => onChange({ ...tube, outerSize: v })}
+            onChange={(v) => onTubeChange({ ...tube, outerSize: v })}
             min={1}
           />
           <NumberField
             label="Corner Radius"
             value={tube.cornerRadius}
-            onChange={(v) => onChange({ ...tube, cornerRadius: v })}
+            onChange={(v) => onTubeChange({ ...tube, cornerRadius: v })}
             min={0}
           />
+          {fitType === "plug" && (
+            <NumberField
+              label="Tube Wall Thickness"
+              value={tube.tubeWallThickness}
+              onChange={(v) => onTubeChange({ ...tube, tubeWallThickness: v })}
+              min={0.5}
+              step={0.5}
+            />
+          )}
         </Box>
       )}
 
@@ -177,23 +215,38 @@ function TubeEndSection({
           <NumberField
             label="Tube Outer Width"
             value={tube.outerWidth}
-            onChange={(v) => onChange({ ...tube, outerWidth: v })}
+            onChange={(v) => onTubeChange({ ...tube, outerWidth: v })}
             min={1}
           />
           <NumberField
             label="Tube Outer Height"
             value={tube.outerHeight}
-            onChange={(v) => onChange({ ...tube, outerHeight: v })}
+            onChange={(v) => onTubeChange({ ...tube, outerHeight: v })}
             min={1}
           />
           <NumberField
             label="Corner Radius"
             value={tube.cornerRadius}
-            onChange={(v) => onChange({ ...tube, cornerRadius: v })}
+            onChange={(v) => onTubeChange({ ...tube, cornerRadius: v })}
             min={0}
           />
+          {fitType === "plug" && (
+            <NumberField
+              label="Tube Wall Thickness"
+              value={tube.tubeWallThickness}
+              onChange={(v) => onTubeChange({ ...tube, tubeWallThickness: v })}
+              min={0.5}
+              step={0.5}
+            />
+          )}
         </Box>
       )}
+
+      <Typography variant="caption" color="text.secondary">
+        {fitType === "socket"
+          ? "Socket wraps around the outside of the tube"
+          : "Plug fits inside the tube bore"}
+      </Typography>
     </SectionCard>
   );
 }
@@ -201,18 +254,22 @@ function TubeEndSection({
 export function AdapterControls({ config, onChange }: AdapterControlsProps) {
   return (
     <Stack spacing={2.5}>
-      {/* Socket A */}
+      {/* End A */}
       <TubeEndSection
-        label="Socket A (Bottom)"
+        label="End A (Bottom)"
         tube={config.endA}
-        onChange={(endA) => onChange({ ...config, endA })}
+        fitType={config.endAFit}
+        onTubeChange={(endA) => onChange({ ...config, endA })}
+        onFitChange={(endAFit) => onChange({ ...config, endAFit })}
       />
 
-      {/* Socket B */}
+      {/* End B */}
       <TubeEndSection
-        label="Socket B (Top)"
+        label="End B (Top)"
         tube={config.endB}
-        onChange={(endB) => onChange({ ...config, endB })}
+        fitType={config.endBFit}
+        onTubeChange={(endB) => onChange({ ...config, endB })}
+        onFitChange={(endBFit) => onChange({ ...config, endBFit })}
       />
 
       {/* Adapter Body */}

@@ -13,9 +13,10 @@ import {
 } from "@react-three/drei";
 import { useMemo } from "react";
 import * as THREE from "three";
-import type { AdapterConfig, TubeSpec } from "@/lib/adapter-types";
+import type { AdapterConfig, TubeSpec, FitType } from "@/lib/adapter-types";
 import {
   getTubeOuterDimensions,
+  getTubeInnerDimensions,
   getAdapterOuterDimensions,
   getEffectiveBendRadius,
 } from "@/lib/adapter-types";
@@ -64,11 +65,38 @@ function generateRoundedRectProfile(
   return points;
 }
 
-function getSocketProfile(
+function getInnerProfile(
   tube: TubeSpec,
   clearance: number,
+  wallThickness: number,
+  fitType: FitType,
   segments: number,
 ): { x: number; z: number }[] {
+  if (fitType === "plug") {
+    const inner = getTubeInnerDimensions(tube);
+    const plugOuterW = inner.width - clearance * 2;
+    const plugOuterH = inner.height - clearance * 2;
+    const plugInnerW = plugOuterW - wallThickness * 2;
+    const plugInnerH = plugOuterH - wallThickness * 2;
+    switch (tube.shape) {
+      case "round":
+        return generateRoundProfile(plugInnerW, segments);
+      case "square":
+        return generateRoundedRectProfile(
+          plugInnerW,
+          plugInnerH,
+          Math.max(0, tube.cornerRadius - wallThickness),
+          segments / 4,
+        );
+      case "rectangular":
+        return generateRoundedRectProfile(
+          plugInnerW,
+          plugInnerH,
+          Math.max(0, tube.cornerRadius - wallThickness),
+          segments / 4,
+        );
+    }
+  }
   switch (tube.shape) {
     case "round":
       return generateRoundProfile(tube.outerDiameter + clearance * 2, segments);
@@ -93,8 +121,32 @@ function getOuterProfile(
   tube: TubeSpec,
   clearance: number,
   wallThickness: number,
+  fitType: FitType,
   segments: number,
 ): { x: number; z: number }[] {
+  if (fitType === "plug") {
+    const inner = getTubeInnerDimensions(tube);
+    const plugOuterW = inner.width - clearance * 2;
+    const plugOuterH = inner.height - clearance * 2;
+    switch (tube.shape) {
+      case "round":
+        return generateRoundProfile(plugOuterW, segments);
+      case "square":
+        return generateRoundedRectProfile(
+          plugOuterW,
+          plugOuterH,
+          tube.cornerRadius,
+          segments / 4,
+        );
+      case "rectangular":
+        return generateRoundedRectProfile(
+          plugOuterW,
+          plugOuterH,
+          tube.cornerRadius,
+          segments / 4,
+        );
+    }
+  }
   switch (tube.shape) {
     case "round":
       return generateRoundProfile(
@@ -184,20 +236,11 @@ function AdapterMesh({ config }: { config: AdapterConfig }) {
     const slicesBend = bendAngle > 0 ? Math.max(32, Math.ceil(bendAngle)) : 2;
     const straightLength = bendAngle === 0 ? bendRadius : 0;
 
-    const innerProfileA = getSocketProfile(endA, socketClearance, segments);
-    const outerProfileA = getOuterProfile(
-      endA,
-      socketClearance,
-      wallThickness,
-      segments,
-    );
-    const innerProfileB = getSocketProfile(endB, socketClearance, segments);
-    const outerProfileB = getOuterProfile(
-      endB,
-      socketClearance,
-      wallThickness,
-      segments,
-    );
+    const { endAFit, endBFit } = config;
+    const innerProfileA = getInnerProfile(endA, socketClearance, wallThickness, endAFit, segments);
+    const outerProfileA = getOuterProfile(endA, socketClearance, wallThickness, endAFit, segments);
+    const innerProfileB = getInnerProfile(endB, socketClearance, wallThickness, endBFit, segments);
+    const outerProfileB = getOuterProfile(endB, socketClearance, wallThickness, endBFit, segments);
 
     const numPoints = Math.max(
       innerProfileA.length,
@@ -517,6 +560,7 @@ function DimensionIndicators({ config }: { config: AdapterConfig }) {
     config.endA,
     config.socketClearance,
     config.wallThickness,
+    config.endAFit,
   );
   const bendRadius = getEffectiveBendRadius(config);
   const straightLength = config.bendAngle === 0 ? bendRadius : 0;
@@ -655,6 +699,7 @@ export function AdapterPreview({ config }: { config: AdapterConfig }) {
     config.endA,
     config.socketClearance,
     config.wallThickness,
+    config.endAFit,
   );
   const bendRadius = getEffectiveBendRadius(config);
   const straightLength = config.bendAngle === 0 ? bendRadius : 0;
