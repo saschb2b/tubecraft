@@ -296,10 +296,34 @@ export function generateAdapterSTL(config: AdapterConfig): ArrayBuffer {
   const { endAFit, endBFit } = config;
 
   // Get profiles for both ends
-  const innerProfileA = getInnerProfile(endA, socketClearance, wallThickness, endAFit, segments);
-  const outerProfileA = getOuterProfile(endA, socketClearance, wallThickness, endAFit, segments);
-  const innerProfileB = getInnerProfile(endB, socketClearance, wallThickness, endBFit, segments);
-  const outerProfileB = getOuterProfile(endB, socketClearance, wallThickness, endBFit, segments);
+  const innerProfileA = getInnerProfile(
+    endA,
+    socketClearance,
+    wallThickness,
+    endAFit,
+    segments,
+  );
+  const outerProfileA = getOuterProfile(
+    endA,
+    socketClearance,
+    wallThickness,
+    endAFit,
+    segments,
+  );
+  const innerProfileB = getInnerProfile(
+    endB,
+    socketClearance,
+    wallThickness,
+    endBFit,
+    segments,
+  );
+  const outerProfileB = getOuterProfile(
+    endB,
+    socketClearance,
+    wallThickness,
+    endBFit,
+    segments,
+  );
 
   const numPoints = Math.max(
     innerProfileA.length,

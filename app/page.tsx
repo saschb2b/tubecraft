@@ -126,7 +126,10 @@ export default function Home() {
       });
     }
 
-    if (adapterConfig.endAFit !== "socket" || adapterConfig.endBFit !== "socket") {
+    if (
+      adapterConfig.endAFit !== "socket" ||
+      adapterConfig.endBFit !== "socket"
+    ) {
       const fitLabel = `A: ${adapterConfig.endAFit} / B: ${adapterConfig.endBFit}`;
       badges.push({
         label: fitLabel,
@@ -487,10 +490,7 @@ export default function Home() {
             }}
           >
             <Typography variant="h6">Download Started!</Typography>
-            <IconButton
-              size="small"
-              onClick={() => setShowThankYou(false)}
-            >
+            <IconButton size="small" onClick={() => setShowThankYou(false)}>
               <X size={18} />
             </IconButton>
           </Box>
@@ -508,27 +508,47 @@ export default function Home() {
               </Typography>
               <Stack spacing={1.5} sx={{ mt: 1 }}>
                 <Stack direction="row" spacing={1.5} alignItems="flex-start">
-                  <Layers size={16} color="#5a9a9d" style={{ marginTop: 2, flexShrink: 0 }} />
+                  <Layers
+                    size={16}
+                    color="#5a9a9d"
+                    style={{ marginTop: 2, flexShrink: 0 }}
+                  />
                   <Typography variant="caption" color="text.secondary">
-                    <strong>Layer height:</strong> 0.2mm for a good balance of speed and quality. Use 0.12mm for press-fit parts.
+                    <strong>Layer height:</strong> 0.2mm for a good balance of
+                    speed and quality. Use 0.12mm for press-fit parts.
                   </Typography>
                 </Stack>
                 <Stack direction="row" spacing={1.5} alignItems="flex-start">
-                  <Gauge size={16} color="#5a9a9d" style={{ marginTop: 2, flexShrink: 0 }} />
+                  <Gauge
+                    size={16}
+                    color="#5a9a9d"
+                    style={{ marginTop: 2, flexShrink: 0 }}
+                  />
                   <Typography variant="caption" color="text.secondary">
-                    <strong>Infill:</strong> 20-30% is usually enough. Use 50%+ for structural joints.
+                    <strong>Infill:</strong> 20-30% is usually enough. Use 50%+
+                    for structural joints.
                   </Typography>
                 </Stack>
                 <Stack direction="row" spacing={1.5} alignItems="flex-start">
-                  <Thermometer size={16} color="#5a9a9d" style={{ marginTop: 2, flexShrink: 0 }} />
+                  <Thermometer
+                    size={16}
+                    color="#5a9a9d"
+                    style={{ marginTop: 2, flexShrink: 0 }}
+                  />
                   <Typography variant="caption" color="text.secondary">
-                    <strong>Material:</strong> PETG for durability and heat resistance. PLA works for prototyping.
+                    <strong>Material:</strong> PETG for durability and heat
+                    resistance. PLA works for prototyping.
                   </Typography>
                 </Stack>
                 <Stack direction="row" spacing={1.5} alignItems="flex-start">
-                  <Printer size={16} color="#5a9a9d" style={{ marginTop: 2, flexShrink: 0 }} />
+                  <Printer
+                    size={16}
+                    color="#5a9a9d"
+                    style={{ marginTop: 2, flexShrink: 0 }}
+                  />
                   <Typography variant="caption" color="text.secondary">
-                    <strong>Orientation:</strong> Print upright for best layer adhesion along the tube walls.
+                    <strong>Orientation:</strong> Print upright for best layer
+                    adhesion along the tube walls.
                   </Typography>
                 </Stack>
               </Stack>
@@ -540,8 +560,13 @@ export default function Home() {
               <Typography variant="overline" color="text.secondary">
                 Support the project
               </Typography>
-              <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, mb: 1.5, display: "block" }}>
-                TubeCraft is free and open source. If it saved you time, consider giving back!
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                sx={{ mt: 0.5, mb: 1.5, display: "block" }}
+              >
+                TubeCraft is free and open source. If it saved you time,
+                consider giving back!
               </Typography>
               <Stack spacing={1.5}>
                 <Button

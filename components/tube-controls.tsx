@@ -257,7 +257,7 @@ export function TubeControls({ config, onChange }: TubeControlsProps) {
     const newClamshell = { ...config.clamshell, ...updates };
     const newConfig = { ...config, clamshell: newClamshell } as TubeConfig;
     // When enabling clamshell, force flat cuts, disable flare, ensure wall thickness
-    if (updates.enabled && updates.enabled === true) {
+    if (updates.enabled) {
       newConfig.topCut = { type: "flat" };
       newConfig.bottomCut = { type: "flat" };
       newConfig.flare = { ...newConfig.flare, enabled: false };
@@ -280,7 +280,8 @@ export function TubeControls({ config, onChange }: TubeControlsProps) {
     return config.outerWidth;
   };
 
-  const canUseFlare = config.topCut.type === "flat" && !config.clamshell.enabled;
+  const canUseFlare =
+    config.topCut.type === "flat" && !config.clamshell.enabled;
   const canUseClamshell = config.shape === "round";
   const clamshellActive = config.clamshell.enabled && canUseClamshell;
 
@@ -426,8 +427,8 @@ export function TubeControls({ config, onChange }: TubeControlsProps) {
           >
             <Stack spacing={1.5}>
               <Typography variant="caption" color="text.secondary">
-                Splits tube into two interlocking halves with stepped joint
-                for wrapping around existing pipes
+                Splits tube into two interlocking halves with stepped joint for
+                wrapping around existing pipes
               </Typography>
               <Box
                 sx={{

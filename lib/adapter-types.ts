@@ -150,7 +150,12 @@ export function getAdapterInnerDimensions(
 ): { width: number; height: number } {
   if (fitType === "plug") {
     // Plug inner = plug outer - wall thickness
-    const plugOuter = getAdapterOuterDimensions(tube, clearance, wallThickness, "plug");
+    const plugOuter = getAdapterOuterDimensions(
+      tube,
+      clearance,
+      wallThickness,
+      "plug",
+    );
     return {
       width: plugOuter.width - wallThickness * 2,
       height: plugOuter.height - wallThickness * 2,

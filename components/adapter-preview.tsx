@@ -237,10 +237,34 @@ function AdapterMesh({ config }: { config: AdapterConfig }) {
     const straightLength = bendAngle === 0 ? bendRadius : 0;
 
     const { endAFit, endBFit } = config;
-    const innerProfileA = getInnerProfile(endA, socketClearance, wallThickness, endAFit, segments);
-    const outerProfileA = getOuterProfile(endA, socketClearance, wallThickness, endAFit, segments);
-    const innerProfileB = getInnerProfile(endB, socketClearance, wallThickness, endBFit, segments);
-    const outerProfileB = getOuterProfile(endB, socketClearance, wallThickness, endBFit, segments);
+    const innerProfileA = getInnerProfile(
+      endA,
+      socketClearance,
+      wallThickness,
+      endAFit,
+      segments,
+    );
+    const outerProfileA = getOuterProfile(
+      endA,
+      socketClearance,
+      wallThickness,
+      endAFit,
+      segments,
+    );
+    const innerProfileB = getInnerProfile(
+      endB,
+      socketClearance,
+      wallThickness,
+      endBFit,
+      segments,
+    );
+    const outerProfileB = getOuterProfile(
+      endB,
+      socketClearance,
+      wallThickness,
+      endBFit,
+      segments,
+    );
 
     const numPoints = Math.max(
       innerProfileA.length,
@@ -427,7 +451,6 @@ function AdapterMesh({ config }: { config: AdapterConfig }) {
   );
 }
 
-
 function HorizontalDimension({
   width,
   y,
@@ -589,7 +612,7 @@ function DimensionIndicators({ config }: { config: AdapterConfig }) {
         width={dimA.width}
         y={-6}
         z={maxOuterWidth / 2 + 5}
-        label={`⌀${dimA.width}mm`}
+        label={`⌀${String(dimA.width)}mm`}
         color="#3b82f6"
         labelPosition="below"
       />
@@ -599,7 +622,7 @@ function DimensionIndicators({ config }: { config: AdapterConfig }) {
         width={dimB.width}
         y={endBY + 6}
         z={0}
-        label={`⌀${dimB.width}mm`}
+        label={`⌀${String(dimB.width)}mm`}
         color="#22c55e"
       />
 
@@ -609,7 +632,7 @@ function DimensionIndicators({ config }: { config: AdapterConfig }) {
         x={-xOffset}
         z={0}
         startY={0}
-        label={`${config.socketDepth}mm`}
+        label={`${String(config.socketDepth)}mm`}
         color="#f59e0b"
         labelSide="left"
       />
@@ -620,7 +643,7 @@ function DimensionIndicators({ config }: { config: AdapterConfig }) {
         x={xOffset}
         z={0}
         startY={0}
-        label={`${Math.round(endBY)}mm`}
+        label={`${String(Math.round(endBY))}mm`}
         color="#f59e0b"
       />
 
@@ -667,11 +690,10 @@ function GridFloor({ size }: { size: number }) {
         <bufferGeometry>
           <bufferAttribute
             attach="attributes-position"
-            count={2}
-            array={
-              new Float32Array([-gridSize / 2, 0.01, 0, gridSize / 2, 0.01, 0])
-            }
-            itemSize={3}
+            args={[
+              new Float32Array([-gridSize / 2, 0.01, 0, gridSize / 2, 0.01, 0]),
+              3,
+            ]}
           />
         </bufferGeometry>
         <lineBasicMaterial color="#ef4444" linewidth={2} />
@@ -681,11 +703,10 @@ function GridFloor({ size }: { size: number }) {
         <bufferGeometry>
           <bufferAttribute
             attach="attributes-position"
-            count={2}
-            array={
-              new Float32Array([0, 0.01, -gridSize / 2, 0, 0.01, gridSize / 2])
-            }
-            itemSize={3}
+            args={[
+              new Float32Array([0, 0.01, -gridSize / 2, 0, 0.01, gridSize / 2]),
+              3,
+            ]}
           />
         </bufferGeometry>
         <lineBasicMaterial color="#3b82f6" linewidth={2} />

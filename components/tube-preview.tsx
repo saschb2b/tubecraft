@@ -41,11 +41,10 @@ function GridFloor({ size }: { size: number }) {
         <bufferGeometry>
           <bufferAttribute
             attach="attributes-position"
-            count={2}
-            array={
-              new Float32Array([-gridSize / 2, 0.01, 0, gridSize / 2, 0.01, 0])
-            }
-            itemSize={3}
+            args={[
+              new Float32Array([-gridSize / 2, 0.01, 0, gridSize / 2, 0.01, 0]),
+              3,
+            ]}
           />
         </bufferGeometry>
         <lineBasicMaterial color="#ef4444" linewidth={2} />
@@ -54,11 +53,10 @@ function GridFloor({ size }: { size: number }) {
         <bufferGeometry>
           <bufferAttribute
             attach="attributes-position"
-            count={2}
-            array={
-              new Float32Array([0, 0.01, -gridSize / 2, 0, 0.01, gridSize / 2])
-            }
-            itemSize={3}
+            args={[
+              new Float32Array([0, 0.01, -gridSize / 2, 0, 0.01, gridSize / 2]),
+              3,
+            ]}
           />
         </bufferGeometry>
         <lineBasicMaterial color="#3b82f6" linewidth={2} />
@@ -84,8 +82,7 @@ function HorizontalDimension({
 }) {
   const halfWidth = width / 2;
   const textSize = Math.max(4, width * 0.1);
-  const textY =
-    labelPosition === "above" ? y + 5 : y - 5 - textSize * 0.5;
+  const textY = labelPosition === "above" ? y + 5 : y - 5 - textSize * 0.5;
 
   return (
     <group>
@@ -279,7 +276,7 @@ function DimensionIndicators({ config }: { config: TubeConfig }) {
         width={outerWidth}
         y={-8}
         z={outerHeight / 2 + 5}
-        label={isRound ? `⌀${outerWidth}` : outerWidth.toString()}
+        label={isRound ? `⌀${String(outerWidth)}` : outerWidth.toString()}
         color="#3b82f6"
         labelPosition="below"
       />
@@ -288,7 +285,7 @@ function DimensionIndicators({ config }: { config: TubeConfig }) {
         width={innerWidth}
         y={config.length + 8}
         z={0}
-        label={isRound ? `⌀${innerWidth}` : innerWidth.toString()}
+        label={isRound ? `⌀${String(innerWidth)}` : innerWidth.toString()}
         color="#22c55e"
       />
 
@@ -360,7 +357,7 @@ function DimensionIndicators({ config }: { config: TubeConfig }) {
             z={-(maxOuter / 2 + 5)}
             label={
               isRound
-                ? `⌀${config.flare.diameter}`
+                ? `⌀${String(config.flare.diameter)}`
                 : config.flare.width.toString()
             }
             color="#ec4899"
@@ -383,7 +380,7 @@ function DimensionIndicators({ config }: { config: TubeConfig }) {
           width={config.topCut.targetDiameter}
           y={config.length + 20}
           z={0}
-          label={`Target ⌀${config.topCut.targetDiameter}`}
+          label={`Target ⌀${String(config.topCut.targetDiameter)}`}
           color="#a855f7"
         />
       )}
@@ -417,7 +414,7 @@ function DimensionIndicators({ config }: { config: TubeConfig }) {
           width={config.bottomCut.targetDiameter}
           y={-16}
           z={0}
-          label={`Target ⌀${config.bottomCut.targetDiameter}`}
+          label={`Target ⌀${String(config.bottomCut.targetDiameter)}`}
           color="#f97316"
           labelPosition="below"
         />
@@ -451,8 +448,6 @@ function getTopZForPreview(
         baseLength + saddleHeight * Math.sin((topCut.angle * Math.PI) / 180)
       );
     }
-    return baseLength;
-  } else if (topCut.type === "chamfer") {
     return baseLength;
   }
   return baseLength;
@@ -506,7 +501,7 @@ function calculateBottomOffset(
     if (bottomCut.type === "miter") {
       const miterAngle = (bottomCut.angle * Math.PI) / 180;
       z = -outerRadius * Math.tan(miterAngle) * Math.cos(angle);
-    } else if (bottomCut.type === "saddle") {
+    } else {
       const targetRadius = bottomCut.targetDiameter / 2;
       const x = outerRadius * Math.cos(angle);
       const distFromCenter = Math.abs(x);
@@ -748,7 +743,7 @@ function calculateRectBottomOffset(
     if (bottomCut.type === "miter") {
       const miterAngle = (bottomCut.angle * Math.PI) / 180;
       z = -pt.x * Math.tan(miterAngle);
-    } else if (bottomCut.type === "saddle") {
+    } else {
       const targetRadius = bottomCut.targetDiameter / 2;
       const distFromCenter = Math.abs(pt.x);
       if (distFromCenter <= targetRadius) {
@@ -962,6 +957,81 @@ function RectangularTubeMesh({
   );
 }
 
+function clamshellBuildArcBand(
+  startAngle: number,
+  endAngle: number,
+  rInner: number,
+  rOuter: number,
+  offsetZ: number,
+  tubeLength: number,
+  totalSegments: number,
+  positions: number[],
+  indices: number[],
+) {
+  const arcSpan = endAngle - startAngle;
+  const segs = Math.max(
+    2,
+    Math.round((arcSpan / (2 * Math.PI)) * totalSegments),
+  );
+  const base = positions.length / 3;
+
+  for (let i = 0; i <= segs; i++) {
+    const a = startAngle + (i / segs) * arcSpan;
+    const c = Math.cos(a),
+      s = Math.sin(a);
+    positions.push(rOuter * c, 0, rOuter * s + offsetZ);
+    positions.push(rInner * c, 0, rInner * s + offsetZ);
+    positions.push(rOuter * c, tubeLength, rOuter * s + offsetZ);
+    positions.push(rInner * c, tubeLength, rInner * s + offsetZ);
+  }
+
+  for (let i = 0; i < segs; i++) {
+    const curr = base + i * 4;
+    const next = base + (i + 1) * 4;
+    indices.push(curr, next, curr + 2);
+    indices.push(next, next + 2, curr + 2);
+    indices.push(curr + 1, curr + 3, next + 1);
+    indices.push(next + 1, curr + 3, next + 3);
+    indices.push(curr, curr + 1, next);
+    indices.push(next, curr + 1, next + 1);
+    indices.push(curr + 2, next + 2, curr + 3);
+    indices.push(next + 2, next + 3, curr + 3);
+  }
+
+  const startBase = base;
+  const endBase = base + segs * 4;
+  indices.push(startBase + 1, startBase, startBase + 3);
+  indices.push(startBase, startBase + 2, startBase + 3);
+  indices.push(endBase, endBase + 1, endBase + 2);
+  indices.push(endBase + 1, endBase + 3, endBase + 2);
+}
+
+function clamshellBuildStepFace(
+  angle: number,
+  offsetZ: number,
+  splitRInner: number,
+  splitROuter: number,
+  tubeLength: number,
+  positions: number[],
+  indices: number[],
+  flip: boolean,
+) {
+  const c = Math.cos(angle),
+    s = Math.sin(angle);
+  const base = positions.length / 3;
+  positions.push(splitRInner * c, 0, splitRInner * s + offsetZ);
+  positions.push(splitROuter * c, 0, splitROuter * s + offsetZ);
+  positions.push(splitRInner * c, tubeLength, splitRInner * s + offsetZ);
+  positions.push(splitROuter * c, tubeLength, splitROuter * s + offsetZ);
+  if (flip) {
+    indices.push(base + 1, base, base + 3);
+    indices.push(base, base + 2, base + 3);
+  } else {
+    indices.push(base, base + 1, base + 2);
+    indices.push(base + 1, base + 3, base + 2);
+  }
+}
+
 function ClamshellRoundTubeMesh({
   config,
 }: {
@@ -977,129 +1047,148 @@ function ClamshellRoundTubeMesh({
   const splitRInner = splitR - clearance / 2;
   const splitROuter = splitR + clearance / 2;
 
-  // Helper: build indexed geometry for an arc band
-  function buildArcBand(
-    startAngle: number, endAngle: number,
-    rInner: number, rOuter: number,
-    offsetZ: number,
-    positions: number[], indices: number[],
-  ) {
-    const arcSpan = endAngle - startAngle;
-    const segs = Math.max(2, Math.round((arcSpan / (2 * Math.PI)) * totalSegments));
-    const base = positions.length / 3;
-
-    for (let i = 0; i <= segs; i++) {
-      const a = startAngle + (i / segs) * arcSpan;
-      const c = Math.cos(a), s = Math.sin(a);
-      // 4 verts per ring: outer-bottom, inner-bottom, outer-top, inner-top
-      positions.push(rOuter * c, 0, rOuter * s + offsetZ);
-      positions.push(rInner * c, 0, rInner * s + offsetZ);
-      positions.push(rOuter * c, length, rOuter * s + offsetZ);
-      positions.push(rInner * c, length, rInner * s + offsetZ);
-    }
-
-    for (let i = 0; i < segs; i++) {
-      const curr = base + i * 4;
-      const next = base + (i + 1) * 4;
-      // Outer wall
-      indices.push(curr, next, curr + 2);
-      indices.push(next, next + 2, curr + 2);
-      // Inner wall
-      indices.push(curr + 1, curr + 3, next + 1);
-      indices.push(next + 1, curr + 3, next + 3);
-      // Bottom cap (y=0)
-      indices.push(curr, curr + 1, next);
-      indices.push(next, curr + 1, next + 1);
-      // Top cap (y=length)
-      indices.push(curr + 2, next + 2, curr + 3);
-      indices.push(next + 2, next + 3, curr + 3);
-    }
-
-    // Radial end caps
-    const startBase = base;
-    const endBase = base + segs * 4;
-    // Start cap
-    indices.push(startBase + 1, startBase, startBase + 3);
-    indices.push(startBase, startBase + 2, startBase + 3);
-    // End cap
-    indices.push(endBase, endBase + 1, endBase + 2);
-    indices.push(endBase + 1, endBase + 3, endBase + 2);
-  }
-
-  // Helper: build step face (seals clearance gap at split angle)
-  function buildStepFace(
-    angle: number, offsetZ: number,
-    positions: number[], indices: number[],
-    flip: boolean,
-  ) {
-    const c = Math.cos(angle), s = Math.sin(angle);
-    const base = positions.length / 3;
-    positions.push(splitRInner * c, 0, splitRInner * s + offsetZ);
-    positions.push(splitROuter * c, 0, splitROuter * s + offsetZ);
-    positions.push(splitRInner * c, length, splitRInner * s + offsetZ);
-    positions.push(splitROuter * c, length, splitROuter * s + offsetZ);
-    if (flip) {
-      indices.push(base + 1, base, base + 3);
-      indices.push(base, base + 2, base + 3);
-    } else {
-      indices.push(base, base + 1, base + 2);
-      indices.push(base + 1, base + 3, base + 2);
-    }
-  }
-
   const halfAGeo = useMemo(() => {
     const positions: number[] = [];
     const indices: number[] = [];
     const offZ = separation / 2;
+    const ab = (sa: number, ea: number, ri: number, ro: number) =>
+      clamshellBuildArcBand(
+        sa,
+        ea,
+        ri,
+        ro,
+        offZ,
+        length,
+        totalSegments,
+        positions,
+        indices,
+      );
+    const sf = (a: number, flip: boolean) =>
+      clamshellBuildStepFace(
+        a,
+        offZ,
+        splitRInner,
+        splitROuter,
+        length,
+        positions,
+        indices,
+        flip,
+      );
 
-    // Inner band: 0→π (flush)
-    buildArcBand(0, Math.PI, innerRadius, splitRInner, offZ, positions, indices);
-    // Outer band: -overlap→π+overlap (extends past split)
-    buildArcBand(-overlapRad, Math.PI + overlapRad, splitROuter, outerRadius, offZ, positions, indices);
-    // Step faces
-    buildStepFace(0, offZ, positions, indices, false);
-    buildStepFace(Math.PI, offZ, positions, indices, true);
+    ab(0, Math.PI, innerRadius, splitRInner);
+    ab(-overlapRad, Math.PI + overlapRad, splitROuter, outerRadius);
+    sf(0, false);
+    sf(Math.PI, true);
 
-    // Snap lips at overlap tips
     if (snapLipHeight > 0) {
       const snapAngle = (2 * Math.PI) / 180;
-      buildArcBand(-overlapRad, -overlapRad + snapAngle, splitROuter - snapLipHeight, splitROuter, offZ, positions, indices);
-      buildArcBand(Math.PI + overlapRad - snapAngle, Math.PI + overlapRad, splitROuter - snapLipHeight, splitROuter, offZ, positions, indices);
+      ab(
+        -overlapRad,
+        -overlapRad + snapAngle,
+        splitROuter - snapLipHeight,
+        splitROuter,
+      );
+      ab(
+        Math.PI + overlapRad - snapAngle,
+        Math.PI + overlapRad,
+        splitROuter - snapLipHeight,
+        splitROuter,
+      );
     }
 
     const geo = new THREE.BufferGeometry();
-    geo.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
+    geo.setAttribute(
+      "position",
+      new THREE.Float32BufferAttribute(positions, 3),
+    );
     geo.setIndex(indices);
     geo.computeVertexNormals();
     return geo;
-  }, [innerRadius, outerRadius, splitRInner, splitROuter, length, totalSegments, overlapRad, separation, snapLipHeight]);
+  }, [
+    innerRadius,
+    outerRadius,
+    splitRInner,
+    splitROuter,
+    length,
+    totalSegments,
+    overlapRad,
+    separation,
+    snapLipHeight,
+  ]);
 
   const halfBGeo = useMemo(() => {
     const positions: number[] = [];
     const indices: number[] = [];
     const offZ = -separation / 2;
+    const ab = (sa: number, ea: number, ri: number, ro: number) =>
+      clamshellBuildArcBand(
+        sa,
+        ea,
+        ri,
+        ro,
+        offZ,
+        length,
+        totalSegments,
+        positions,
+        indices,
+      );
+    const sf = (a: number, flip: boolean) =>
+      clamshellBuildStepFace(
+        a,
+        offZ,
+        splitRInner,
+        splitROuter,
+        length,
+        positions,
+        indices,
+        flip,
+      );
 
-    // Inner band: π-overlap→2π+overlap (extends past split)
-    buildArcBand(Math.PI - overlapRad, 2 * Math.PI + overlapRad, innerRadius, splitRInner, offZ, positions, indices);
-    // Outer band: π→2π (flush)
-    buildArcBand(Math.PI, 2 * Math.PI, splitROuter, outerRadius, offZ, positions, indices);
-    // Step faces
-    buildStepFace(Math.PI, offZ, positions, indices, false);
-    buildStepFace(2 * Math.PI, offZ, positions, indices, true);
+    ab(
+      Math.PI - overlapRad,
+      2 * Math.PI + overlapRad,
+      innerRadius,
+      splitRInner,
+    );
+    ab(Math.PI, 2 * Math.PI, splitROuter, outerRadius);
+    sf(Math.PI, false);
+    sf(2 * Math.PI, true);
 
-    // Snap lips at overlap tips
     if (snapLipHeight > 0) {
       const snapAngle = (2 * Math.PI) / 180;
-      buildArcBand(Math.PI - overlapRad, Math.PI - overlapRad + snapAngle, splitRInner, splitRInner + snapLipHeight, offZ, positions, indices);
-      buildArcBand(2 * Math.PI + overlapRad - snapAngle, 2 * Math.PI + overlapRad, splitRInner, splitRInner + snapLipHeight, offZ, positions, indices);
+      ab(
+        Math.PI - overlapRad,
+        Math.PI - overlapRad + snapAngle,
+        splitRInner,
+        splitRInner + snapLipHeight,
+      );
+      ab(
+        2 * Math.PI + overlapRad - snapAngle,
+        2 * Math.PI + overlapRad,
+        splitRInner,
+        splitRInner + snapLipHeight,
+      );
     }
 
     const geo = new THREE.BufferGeometry();
-    geo.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
+    geo.setAttribute(
+      "position",
+      new THREE.Float32BufferAttribute(positions, 3),
+    );
     geo.setIndex(indices);
     geo.computeVertexNormals();
     return geo;
-  }, [innerRadius, outerRadius, splitRInner, splitROuter, length, totalSegments, overlapRad, separation, snapLipHeight]);
+  }, [
+    innerRadius,
+    outerRadius,
+    splitRInner,
+    splitROuter,
+    length,
+    totalSegments,
+    overlapRad,
+    separation,
+    snapLipHeight,
+  ]);
 
   return (
     <group>

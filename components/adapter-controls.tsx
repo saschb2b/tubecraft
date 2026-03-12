@@ -136,9 +136,7 @@ function TubeEndSection({
           label="Tube Shape"
           size="small"
           value={tube.shape}
-          onChange={(e) =>
-            handleShapeChange(e.target.value as AdapterEndShape)
-          }
+          onChange={(e) => handleShapeChange(e.target.value as AdapterEndShape)}
           fullWidth
         >
           <MenuItem value="round">Round</MenuItem>
@@ -274,9 +272,7 @@ export function AdapterControls({ config, onChange }: AdapterControlsProps) {
 
       {/* Adapter Body */}
       <SectionCard title="Adapter Body">
-        <Box
-          sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1.5 }}
-        >
+        <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1.5 }}>
           <NumberField
             label="Wall Thickness"
             value={config.wallThickness}
@@ -305,9 +301,7 @@ export function AdapterControls({ config, onChange }: AdapterControlsProps) {
 
       {/* Elbow / Bend */}
       <SectionCard title="Elbow / Bend">
-        <Box
-          sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1.5 }}
-        >
+        <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1.5 }}>
           <NumberField
             label="Bend Angle"
             value={config.bendAngle}
