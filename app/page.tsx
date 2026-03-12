@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -42,6 +42,14 @@ import GitHubIcon from "@mui/icons-material/GitHub";
 type TabType = "tube" | "adapter";
 
 export default function Home() {
+  return (
+    <Suspense>
+      <HomeContent />
+    </Suspense>
+  );
+}
+
+function HomeContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const tabParam = searchParams.get("tab");
@@ -73,7 +81,8 @@ export default function Home() {
   const handleDownload = () => {
     if (activeTab === "tube") {
       const shapeName = tubeConfig.shape;
-      const filename = `tube-${shapeName}-${String(tubeConfig.length)}mm.stl`;
+      const clamshellSuffix = tubeConfig.clamshell.enabled ? "-clamshell" : "";
+      const filename = `tube-${shapeName}${clamshellSuffix}-${String(tubeConfig.length)}mm.stl`;
       downloadSTL(tubeConfig, filename);
     } else {
       const filename = `adapter-${adapterConfig.endA.shape}-to-${adapterConfig.endB.shape}-${String(adapterConfig.bendAngle)}deg.stl`;
@@ -92,6 +101,13 @@ export default function Home() {
 
   const getTubeBadges = () => {
     const badges: { label: string; color: string }[] = [];
+
+    if (tubeConfig.clamshell.enabled) {
+      badges.push({
+        label: "Clamshell",
+        color: "#06b6d4",
+      });
+    }
 
     if (tubeConfig.flare.enabled && tubeConfig.topCut.type === "flat") {
       badges.push({

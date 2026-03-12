@@ -962,7 +962,173 @@ function RectangularTubeMesh({
   );
 }
 
+function ClamshellRoundTubeMesh({
+  config,
+}: {
+  config: TubeConfig & { shape: "round" };
+}) {
+  const { innerDiameter, outerDiameter, length, clamshell } = config;
+  const innerRadius = innerDiameter / 2;
+  const outerRadius = outerDiameter / 2;
+  const totalSegments = 64;
+  const { overlap, clearance, separation, snapLipHeight } = clamshell;
+  const overlapRad = (overlap * Math.PI) / 180;
+  const splitR = (innerRadius + outerRadius) / 2;
+  const splitRInner = splitR - clearance / 2;
+  const splitROuter = splitR + clearance / 2;
+
+  // Helper: build indexed geometry for an arc band
+  function buildArcBand(
+    startAngle: number, endAngle: number,
+    rInner: number, rOuter: number,
+    offsetZ: number,
+    positions: number[], indices: number[],
+  ) {
+    const arcSpan = endAngle - startAngle;
+    const segs = Math.max(2, Math.round((arcSpan / (2 * Math.PI)) * totalSegments));
+    const base = positions.length / 3;
+
+    for (let i = 0; i <= segs; i++) {
+      const a = startAngle + (i / segs) * arcSpan;
+      const c = Math.cos(a), s = Math.sin(a);
+      // 4 verts per ring: outer-bottom, inner-bottom, outer-top, inner-top
+      positions.push(rOuter * c, 0, rOuter * s + offsetZ);
+      positions.push(rInner * c, 0, rInner * s + offsetZ);
+      positions.push(rOuter * c, length, rOuter * s + offsetZ);
+      positions.push(rInner * c, length, rInner * s + offsetZ);
+    }
+
+    for (let i = 0; i < segs; i++) {
+      const curr = base + i * 4;
+      const next = base + (i + 1) * 4;
+      // Outer wall
+      indices.push(curr, next, curr + 2);
+      indices.push(next, next + 2, curr + 2);
+      // Inner wall
+      indices.push(curr + 1, curr + 3, next + 1);
+      indices.push(next + 1, curr + 3, next + 3);
+      // Bottom cap (y=0)
+      indices.push(curr, curr + 1, next);
+      indices.push(next, curr + 1, next + 1);
+      // Top cap (y=length)
+      indices.push(curr + 2, next + 2, curr + 3);
+      indices.push(next + 2, next + 3, curr + 3);
+    }
+
+    // Radial end caps
+    const startBase = base;
+    const endBase = base + segs * 4;
+    // Start cap
+    indices.push(startBase + 1, startBase, startBase + 3);
+    indices.push(startBase, startBase + 2, startBase + 3);
+    // End cap
+    indices.push(endBase, endBase + 1, endBase + 2);
+    indices.push(endBase + 1, endBase + 3, endBase + 2);
+  }
+
+  // Helper: build step face (seals clearance gap at split angle)
+  function buildStepFace(
+    angle: number, offsetZ: number,
+    positions: number[], indices: number[],
+    flip: boolean,
+  ) {
+    const c = Math.cos(angle), s = Math.sin(angle);
+    const base = positions.length / 3;
+    positions.push(splitRInner * c, 0, splitRInner * s + offsetZ);
+    positions.push(splitROuter * c, 0, splitROuter * s + offsetZ);
+    positions.push(splitRInner * c, length, splitRInner * s + offsetZ);
+    positions.push(splitROuter * c, length, splitROuter * s + offsetZ);
+    if (flip) {
+      indices.push(base + 1, base, base + 3);
+      indices.push(base, base + 2, base + 3);
+    } else {
+      indices.push(base, base + 1, base + 2);
+      indices.push(base + 1, base + 3, base + 2);
+    }
+  }
+
+  const halfAGeo = useMemo(() => {
+    const positions: number[] = [];
+    const indices: number[] = [];
+    const offZ = separation / 2;
+
+    // Inner band: 0→π (flush)
+    buildArcBand(0, Math.PI, innerRadius, splitRInner, offZ, positions, indices);
+    // Outer band: -overlap→π+overlap (extends past split)
+    buildArcBand(-overlapRad, Math.PI + overlapRad, splitROuter, outerRadius, offZ, positions, indices);
+    // Step faces
+    buildStepFace(0, offZ, positions, indices, false);
+    buildStepFace(Math.PI, offZ, positions, indices, true);
+
+    // Snap lips at overlap tips
+    if (snapLipHeight > 0) {
+      const snapAngle = (2 * Math.PI) / 180;
+      buildArcBand(-overlapRad, -overlapRad + snapAngle, splitROuter - snapLipHeight, splitROuter, offZ, positions, indices);
+      buildArcBand(Math.PI + overlapRad - snapAngle, Math.PI + overlapRad, splitROuter - snapLipHeight, splitROuter, offZ, positions, indices);
+    }
+
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
+    geo.setIndex(indices);
+    geo.computeVertexNormals();
+    return geo;
+  }, [innerRadius, outerRadius, splitRInner, splitROuter, length, totalSegments, overlapRad, separation, snapLipHeight]);
+
+  const halfBGeo = useMemo(() => {
+    const positions: number[] = [];
+    const indices: number[] = [];
+    const offZ = -separation / 2;
+
+    // Inner band: π-overlap→2π+overlap (extends past split)
+    buildArcBand(Math.PI - overlapRad, 2 * Math.PI + overlapRad, innerRadius, splitRInner, offZ, positions, indices);
+    // Outer band: π→2π (flush)
+    buildArcBand(Math.PI, 2 * Math.PI, splitROuter, outerRadius, offZ, positions, indices);
+    // Step faces
+    buildStepFace(Math.PI, offZ, positions, indices, false);
+    buildStepFace(2 * Math.PI, offZ, positions, indices, true);
+
+    // Snap lips at overlap tips
+    if (snapLipHeight > 0) {
+      const snapAngle = (2 * Math.PI) / 180;
+      buildArcBand(Math.PI - overlapRad, Math.PI - overlapRad + snapAngle, splitRInner, splitRInner + snapLipHeight, offZ, positions, indices);
+      buildArcBand(2 * Math.PI + overlapRad - snapAngle, 2 * Math.PI + overlapRad, splitRInner, splitRInner + snapLipHeight, offZ, positions, indices);
+    }
+
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
+    geo.setIndex(indices);
+    geo.computeVertexNormals();
+    return geo;
+  }, [innerRadius, outerRadius, splitRInner, splitROuter, length, totalSegments, overlapRad, separation, snapLipHeight]);
+
+  return (
+    <group>
+      <mesh geometry={halfAGeo}>
+        <meshStandardMaterial
+          color="#b8c4ce"
+          metalness={0.85}
+          roughness={0.15}
+          side={THREE.DoubleSide}
+          envMapIntensity={1.2}
+        />
+      </mesh>
+      <mesh geometry={halfBGeo}>
+        <meshStandardMaterial
+          color="#9ab4c4"
+          metalness={0.85}
+          roughness={0.15}
+          side={THREE.DoubleSide}
+          envMapIntensity={1.2}
+        />
+      </mesh>
+    </group>
+  );
+}
+
 function TubeMesh({ config }: { config: TubeConfig }) {
+  if (config.shape === "round" && config.clamshell.enabled) {
+    return <ClamshellRoundTubeMesh config={config} />;
+  }
   if (config.shape === "round") {
     return <RoundTubeMesh config={config} />;
   }

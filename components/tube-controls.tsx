@@ -15,6 +15,7 @@ import type {
   CutType,
   EndCutConfig,
   FlareConfig,
+  ClamshellConfig,
 } from "@/lib/tube-types";
 import {
   DEFAULT_ROUND_CONFIG,
@@ -207,6 +208,10 @@ function EndCutControls({
 
 export function TubeControls({ config, onChange }: TubeControlsProps) {
   const handleShapeChange = (shape: TubeShape) => {
+    const clamshell =
+      shape === "round"
+        ? config.clamshell
+        : { ...config.clamshell, enabled: false };
     if (shape === "round") {
       onChange({
         ...DEFAULT_ROUND_CONFIG,
@@ -214,6 +219,7 @@ export function TubeControls({ config, onChange }: TubeControlsProps) {
         flare: config.flare,
         topCut: config.topCut,
         bottomCut: config.bottomCut,
+        clamshell,
       });
     } else if (shape === "square") {
       onChange({
@@ -222,6 +228,7 @@ export function TubeControls({ config, onChange }: TubeControlsProps) {
         flare: config.flare,
         topCut: config.topCut,
         bottomCut: config.bottomCut,
+        clamshell,
       });
     } else {
       onChange({
@@ -230,6 +237,7 @@ export function TubeControls({ config, onChange }: TubeControlsProps) {
         flare: config.flare,
         topCut: config.topCut,
         bottomCut: config.bottomCut,
+        clamshell,
       });
     }
   };
@@ -245,13 +253,36 @@ export function TubeControls({ config, onChange }: TubeControlsProps) {
     } as TubeConfig);
   };
 
+  const updateClamshell = (updates: Partial<ClamshellConfig>) => {
+    const newClamshell = { ...config.clamshell, ...updates };
+    const newConfig = { ...config, clamshell: newClamshell } as TubeConfig;
+    // When enabling clamshell, force flat cuts, disable flare, ensure wall thickness
+    if (updates.enabled && updates.enabled === true) {
+      newConfig.topCut = { type: "flat" };
+      newConfig.bottomCut = { type: "flat" };
+      newConfig.flare = { ...newConfig.flare, enabled: false };
+      // Ensure minimum wall thickness for stepped joint
+      if (newConfig.shape === "round") {
+        const wallThickness =
+          (newConfig.outerDiameter - newConfig.innerDiameter) / 2;
+        const minWall = newClamshell.clearance + 1.0; // clearance gap + 0.5mm per band minimum
+        if (wallThickness < minWall) {
+          newConfig.outerDiameter = newConfig.innerDiameter + minWall * 2;
+        }
+      }
+    }
+    onChange(newConfig);
+  };
+
   const getOuterSize = () => {
     if (config.shape === "round") return config.outerDiameter;
     if (config.shape === "square") return config.outerSize;
     return config.outerWidth;
   };
 
-  const canUseFlare = config.topCut.type === "flat";
+  const canUseFlare = config.topCut.type === "flat" && !config.clamshell.enabled;
+  const canUseClamshell = config.shape === "round";
+  const clamshellActive = config.clamshell.enabled && canUseClamshell;
 
   return (
     <Stack spacing={2.5}>
@@ -353,18 +384,118 @@ export function TubeControls({ config, onChange }: TubeControlsProps) {
         </Box>
       </SectionCard>
 
+      {/* Clamshell Split */}
+      <Stack spacing={1}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <Typography
+            variant="overline"
+            color="text.secondary"
+            sx={{ letterSpacing: 1 }}
+          >
+            Clamshell Split
+          </Typography>
+          <Switch
+            size="small"
+            checked={clamshellActive}
+            onChange={(e) => updateClamshell({ enabled: e.target.checked })}
+            disabled={!canUseClamshell}
+          />
+        </Box>
+
+        {!canUseClamshell && config.clamshell.enabled && (
+          <Typography variant="caption" color="warning.main">
+            Clamshell split is only available for round tubes
+          </Typography>
+        )}
+
+        {clamshellActive && (
+          <Box
+            sx={{
+              bgcolor: "rgba(255,255,255,0.03)",
+              borderRadius: 1.5,
+              border: "1px solid",
+              borderColor: "divider",
+              p: 1.5,
+            }}
+          >
+            <Stack spacing={1.5}>
+              <Typography variant="caption" color="text.secondary">
+                Splits tube into two interlocking halves with stepped joint
+                for wrapping around existing pipes
+              </Typography>
+              <Box
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: 1.5,
+                }}
+              >
+                <NumberInput
+                  label="Overlap"
+                  value={config.clamshell.overlap}
+                  onChange={(v) => updateClamshell({ overlap: v })}
+                  min={2}
+                  max={30}
+                  step={1}
+                  unit="°"
+                />
+                <NumberInput
+                  label="Clearance"
+                  value={config.clamshell.clearance}
+                  onChange={(v) => updateClamshell({ clearance: v })}
+                  min={0.05}
+                  max={0.5}
+                  step={0.05}
+                />
+                <NumberInput
+                  label="Separation"
+                  value={config.clamshell.separation}
+                  onChange={(v) => updateClamshell({ separation: v })}
+                  min={2}
+                  max={20}
+                  step={1}
+                />
+                <NumberInput
+                  label="Snap Lip"
+                  value={config.clamshell.snapLipHeight}
+                  onChange={(v) => updateClamshell({ snapLipHeight: v })}
+                  min={0}
+                  max={1}
+                  step={0.1}
+                  unit="mm"
+                />
+              </Box>
+            </Stack>
+          </Box>
+        )}
+      </Stack>
+
       {/* Top End */}
       <SectionCard title="Top End">
         <EndCutControls
           cutConfig={config.topCut}
           onChange={(cut) => updateConfig({ topCut: cut })}
           outerSize={getOuterSize()}
+          disabled={clamshellActive}
         />
-        {config.topCut.type !== "flat" && config.flare.enabled && (
-          <Typography variant="caption" color="warning.main">
-            Flare disabled - only works with flat top cut
+        {clamshellActive && (
+          <Typography variant="caption" color="text.secondary">
+            End cuts disabled in clamshell mode
           </Typography>
         )}
+        {!clamshellActive &&
+          config.topCut.type !== "flat" &&
+          config.flare.enabled && (
+            <Typography variant="caption" color="warning.main">
+              Flare disabled - only works with flat top cut
+            </Typography>
+          )}
       </SectionCard>
 
       {/* Bottom End */}
@@ -373,7 +504,13 @@ export function TubeControls({ config, onChange }: TubeControlsProps) {
           cutConfig={config.bottomCut}
           onChange={(cut) => updateConfig({ bottomCut: cut })}
           outerSize={getOuterSize()}
+          disabled={clamshellActive}
         />
+        {clamshellActive && (
+          <Typography variant="caption" color="text.secondary">
+            End cuts disabled in clamshell mode
+          </Typography>
+        )}
       </SectionCard>
 
       {/* Press-Fit Flare */}
@@ -394,9 +531,9 @@ export function TubeControls({ config, onChange }: TubeControlsProps) {
           </Typography>
           <Switch
             size="small"
-            checked={config.flare.enabled && canUseFlare}
+            checked={config.flare.enabled && canUseFlare && !clamshellActive}
             onChange={(e) => updateFlare({ enabled: e.target.checked })}
-            disabled={!canUseFlare}
+            disabled={!canUseFlare || clamshellActive}
           />
         </Box>
 

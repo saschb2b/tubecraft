@@ -45,6 +45,14 @@ export interface FlareConfig {
   antiRotationType: "flat" | "key" | "notch";
 }
 
+export interface ClamshellConfig {
+  enabled: boolean;
+  overlap: number; // Degrees of arc the step joint extends past the split plane
+  clearance: number; // Gap between overlapping surfaces for fit tolerance
+  separation: number; // Gap between the two halves in the STL output
+  snapLipHeight: number; // Height of snap lip detent for retention (mm)
+}
+
 export interface HoleConfig {
   enabled: boolean;
   count: number;
@@ -97,6 +105,7 @@ interface BaseTubeConfig {
   bottomCut: EndCutConfig;
   holes: HolesAndSlotsConfig;
   connector: ConnectorConfig;
+  clamshell: ClamshellConfig;
 }
 
 export interface RoundTubeConfig extends BaseTubeConfig {
@@ -183,6 +192,14 @@ export const DEFAULT_CONNECTOR: ConnectorConfig = {
   },
 };
 
+export const DEFAULT_CLAMSHELL: ClamshellConfig = {
+  enabled: false,
+  overlap: 8,
+  clearance: 0.2,
+  separation: 5,
+  snapLipHeight: 0.3,
+};
+
 export const DEFAULT_ROUND_CONFIG: RoundTubeConfig = {
   shape: "round",
   innerDiameter: 50,
@@ -193,6 +210,7 @@ export const DEFAULT_ROUND_CONFIG: RoundTubeConfig = {
   bottomCut: { ...DEFAULT_CUT },
   holes: { ...DEFAULT_HOLES },
   connector: { ...DEFAULT_CONNECTOR },
+  clamshell: { ...DEFAULT_CLAMSHELL },
 };
 
 export const DEFAULT_SQUARE_CONFIG: SquareTubeConfig = {
@@ -206,6 +224,7 @@ export const DEFAULT_SQUARE_CONFIG: SquareTubeConfig = {
   bottomCut: { ...DEFAULT_CUT },
   holes: { ...DEFAULT_HOLES },
   connector: { ...DEFAULT_CONNECTOR },
+  clamshell: { ...DEFAULT_CLAMSHELL },
 };
 
 export const DEFAULT_RECTANGULAR_CONFIG: RectangularTubeConfig = {
@@ -221,4 +240,5 @@ export const DEFAULT_RECTANGULAR_CONFIG: RectangularTubeConfig = {
   bottomCut: { ...DEFAULT_CUT },
   holes: { ...DEFAULT_HOLES },
   connector: { ...DEFAULT_CONNECTOR },
+  clamshell: { ...DEFAULT_CLAMSHELL },
 };

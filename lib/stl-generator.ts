@@ -886,6 +886,122 @@ function generateRectangularTubeSTL(
   return createSTLBinary(triangles);
 }
 
+function generateClamshellRoundTubeSTL(config: RoundTubeConfig): ArrayBuffer {
+  const { innerDiameter, outerDiameter, length, clamshell } = config;
+  const innerRadius = innerDiameter / 2;
+  const outerRadius = outerDiameter / 2;
+  const totalSegments = 64;
+
+  const { overlap, clearance, separation } = clamshell;
+  const overlapRad = (overlap * Math.PI) / 180;
+
+  // Split wall at midpoint with clearance gap
+  const splitR = (innerRadius + outerRadius) / 2;
+  const splitRInner = splitR - clearance / 2;
+  const splitROuter = splitR + clearance / 2;
+
+  const triangles: number[][] = [];
+
+  // Generate an arc band: tube segment from rInner to rOuter, startAngle to endAngle
+  function generateArcBand(
+    startAngle: number,
+    endAngle: number,
+    rInner: number,
+    rOuter: number,
+    offsetY: number,
+  ) {
+    const arcSpan = endAngle - startAngle;
+    const segs = Math.max(2, Math.round((arcSpan / (2 * Math.PI)) * totalSegments));
+
+    for (let i = 0; i < segs; i++) {
+      const a1 = startAngle + (i / segs) * arcSpan;
+      const a2 = startAngle + ((i + 1) / segs) * arcSpan;
+      const c1 = Math.cos(a1), s1 = Math.sin(a1);
+      const c2 = Math.cos(a2), s2 = Math.sin(a2);
+
+      const ox1 = rOuter * c1, oy1 = rOuter * s1 + offsetY;
+      const ox2 = rOuter * c2, oy2 = rOuter * s2 + offsetY;
+      const ix1 = rInner * c1, iy1 = rInner * s1 + offsetY;
+      const ix2 = rInner * c2, iy2 = rInner * s2 + offsetY;
+
+      // Outer wall
+      addTriangle(triangles, ox1, oy1, 0, ox2, oy2, 0, ox1, oy1, length);
+      addTriangle(triangles, ox2, oy2, 0, ox2, oy2, length, ox1, oy1, length);
+      // Inner wall
+      addTriangle(triangles, ix1, iy1, 0, ix1, iy1, length, ix2, iy2, 0);
+      addTriangle(triangles, ix2, iy2, 0, ix1, iy1, length, ix2, iy2, length);
+      // Top cap (z = length)
+      addTriangle(triangles, ix1, iy1, length, ox1, oy1, length, ix2, iy2, length);
+      addTriangle(triangles, ix2, iy2, length, ox1, oy1, length, ox2, oy2, length);
+      // Bottom cap (z = 0)
+      addTriangle(triangles, ox1, oy1, 0, ix1, iy1, 0, ix2, iy2, 0);
+      addTriangle(triangles, ox1, oy1, 0, ix2, iy2, 0, ox2, oy2, 0);
+    }
+
+    // Radial end caps at start and end of arc
+    for (const isStart of [true, false]) {
+      const angle = isStart ? startAngle : endAngle;
+      const c = Math.cos(angle), s = Math.sin(angle);
+      const oxa = rOuter * c, oya = rOuter * s + offsetY;
+      const ixa = rInner * c, iya = rInner * s + offsetY;
+
+      if (isStart) {
+        addTriangle(triangles, ixa, iya, 0, oxa, oya, 0, ixa, iya, length);
+        addTriangle(triangles, oxa, oya, 0, oxa, oya, length, ixa, iya, length);
+      } else {
+        addTriangle(triangles, oxa, oya, 0, ixa, iya, 0, oxa, oya, length);
+        addTriangle(triangles, ixa, iya, 0, ixa, iya, length, oxa, oya, length);
+      }
+    }
+  }
+
+  // Step face: seals the clearance gap between inner and outer bands at split plane
+  function generateStepFace(angle: number, offsetY: number, normalUp: boolean) {
+    const c = Math.cos(angle), s = Math.sin(angle);
+    const ix = splitRInner * c, iy = splitRInner * s + offsetY;
+    const ox = splitROuter * c, oy = splitROuter * s + offsetY;
+
+    if (normalUp) {
+      addTriangle(triangles, ix, iy, 0, ox, oy, 0, ix, iy, length);
+      addTriangle(triangles, ox, oy, 0, ox, oy, length, ix, iy, length);
+    } else {
+      addTriangle(triangles, ox, oy, 0, ix, iy, 0, ox, oy, length);
+      addTriangle(triangles, ix, iy, 0, ix, iy, length, ox, oy, length);
+    }
+  }
+
+  const offA = separation / 2;
+  const offB = -separation / 2;
+
+  // Half A (top, angles 0→π): inner band flush, outer band overlaps past split
+  generateArcBand(0, Math.PI, innerRadius, splitRInner, offA);
+  generateArcBand(-overlapRad, Math.PI + overlapRad, splitROuter, outerRadius, offA);
+  generateStepFace(0, offA, false);
+  generateStepFace(Math.PI, offA, true);
+
+  // Half B (bottom, angles π→2π): outer band flush, inner band overlaps past split
+  generateArcBand(Math.PI - overlapRad, 2 * Math.PI + overlapRad, innerRadius, splitRInner, offB);
+  generateArcBand(Math.PI, 2 * Math.PI, splitROuter, outerRadius, offB);
+  generateStepFace(Math.PI, offB, false);
+  generateStepFace(2 * Math.PI, offB, true);
+
+  // Snap lips: small teeth at overlap tips that protrude into the clearance gap
+  const snapLipH = clamshell.snapLipHeight;
+  if (snapLipH > 0) {
+    const snapAngle = (2 * Math.PI) / 180; // 2° of arc for each snap lip
+
+    // Half A outer band tips — teeth protrude inward (below splitROuter)
+    generateArcBand(-overlapRad, -overlapRad + snapAngle, splitROuter - snapLipH, splitROuter, offA);
+    generateArcBand(Math.PI + overlapRad - snapAngle, Math.PI + overlapRad, splitROuter - snapLipH, splitROuter, offA);
+
+    // Half B inner band tips — teeth protrude outward (above splitRInner)
+    generateArcBand(Math.PI - overlapRad, Math.PI - overlapRad + snapAngle, splitRInner, splitRInner + snapLipH, offB);
+    generateArcBand(2 * Math.PI + overlapRad - snapAngle, 2 * Math.PI + overlapRad, splitRInner, splitRInner + snapLipH, offB);
+  }
+
+  return createSTLBinary(triangles);
+}
+
 function createSTLBinary(triangles: number[][]): ArrayBuffer {
   const numTriangles = triangles.length;
   const bufferSize = 84 + numTriangles * 50;
@@ -928,11 +1044,13 @@ function createSTLBinary(triangles: number[][]): ArrayBuffer {
 }
 
 export function generateSTL(config: TubeConfig): ArrayBuffer {
+  if (config.shape === "round" && config.clamshell.enabled) {
+    return generateClamshellRoundTubeSTL(config);
+  }
   if (config.shape === "round") {
     return generateRoundTubeSTL(config);
-  } else {
-    return generateRectangularTubeSTL(config);
   }
+  return generateRectangularTubeSTL(config);
 }
 
 export function downloadSTL(config: TubeConfig, filename = "tube.stl"): void {

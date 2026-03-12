@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import Script from "next/script";
 
 const geistSans = Geist({ subsets: ["latin"] });
 
@@ -19,6 +20,13 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        <Script
+          async
+          src="https://umami.saschb2b.com/script.js"
+          data-website-id="51c8e9a6-abd3-475a-bca2-db808244f8c0"
+        />
+      </head>
       <body className={geistSans.className}>
         <AppRouterCacheProvider>
           <ThemeProvider>{children}</ThemeProvider>
