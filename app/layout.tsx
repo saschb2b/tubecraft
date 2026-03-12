@@ -8,9 +8,39 @@ import Script from "next/script";
 const geistSans = Geist({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "TubeCraft - 3D Printable Tube Generator",
+  title: "TubeCraft - 3D Printable Tube & Adapter Generator",
   description:
-    "Generate custom tubes and adapters for 3D printing. Supports round, square, and rectangular shapes with press-fit flare options.",
+    "Free online tool to generate custom 3D printable tubes and adapters. Design round, square, and rectangular shapes with press-fit flares, clamshell splits, miter cuts, and STL export.",
+  keywords: [
+    "3D printing",
+    "tube generator",
+    "STL generator",
+    "adapter generator",
+    "pipe fitting",
+    "clamshell tube",
+    "press-fit flare",
+    "3D printable tube",
+    "custom tube",
+    "parametric design",
+  ],
+  authors: [{ name: "TubeCraft" }],
+  openGraph: {
+    title: "TubeCraft - 3D Printable Tube & Adapter Generator",
+    description:
+      "Free online tool to design custom tubes and adapters for 3D printing with real-time preview and STL export.",
+    type: "website",
+    siteName: "TubeCraft",
+  },
+  twitter: {
+    card: "summary",
+    title: "TubeCraft - 3D Printable Tube & Adapter Generator",
+    description:
+      "Free online tool to design custom tubes and adapters for 3D printing with real-time preview and STL export.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({

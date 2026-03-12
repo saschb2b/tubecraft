@@ -1,0 +1,8 @@
+<svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="180" height="180" rx="37" fill="#5a9a9d"/>
+  <!-- Cylinder / tube icon matching lucide Cylinder -->
+  <ellipse cx="90" cy="55" rx="40" ry="18" stroke="#ffffff" stroke-width="8" fill="none" stroke-linecap="round"/>
+  <line x1="50" y1="55" x2="50" y2="125" stroke="#ffffff" stroke-width="8" stroke-linecap="round"/>
+  <line x1="130" y1="55" x2="130" y2="125" stroke="#ffffff" stroke-width="8" stroke-linecap="round"/>
+  <path d="M 50 125 A 40 18 0 0 0 130 125" stroke="#ffffff" stroke-width="8" fill="none" stroke-linecap="round"/>
+</svg>

@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useCallback, Suspense } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useState, useCallback } from "react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
@@ -25,7 +24,7 @@ import { DEFAULT_ADAPTER_CONFIG } from "@/lib/adapter-types";
 import {
   Download,
   RotateCcw,
-  Box as BoxIcon,
+  Cylinder,
   Coffee,
   Heart,
   Link2,
@@ -41,36 +40,20 @@ import GitHubIcon from "@mui/icons-material/GitHub";
 
 type TabType = "tube" | "adapter";
 
-export default function Home() {
-  return (
-    <Suspense>
-      <HomeContent />
-    </Suspense>
-  );
+function getInitialTab(): TabType {
+  if (typeof window === "undefined") return "tube";
+  const params = new URLSearchParams(window.location.search);
+  return params.get("tab") === "adapter" ? "adapter" : "tube";
 }
 
-function HomeContent() {
-  const searchParams = useSearchParams();
-  const router = useRouter();
-  const tabParam = searchParams.get("tab");
-  const initialTab: TabType =
-    tabParam === "adapter" ? "adapter" : "tube";
-  const [activeTab, setActiveTab] = useState<TabType>(initialTab);
+export default function Home() {
+  const [activeTab, setActiveTab] = useState<TabType>(getInitialTab);
 
-  const handleTabChange = useCallback(
-    (tab: TabType) => {
-      setActiveTab(tab);
-      const params = new URLSearchParams(searchParams.toString());
-      if (tab === "tube") {
-        params.delete("tab");
-      } else {
-        params.set("tab", tab);
-      }
-      const query = params.toString();
-      router.replace(query ? `?${query}` : "/", { scroll: false });
-    },
-    [searchParams, router],
-  );
+  const handleTabChange = useCallback((tab: TabType) => {
+    setActiveTab(tab);
+    const url = tab === "tube" ? "/" : "/?tab=adapter";
+    window.history.replaceState(null, "", url);
+  }, []);
   const [tubeConfig, setTubeConfig] =
     useState<TubeConfig>(DEFAULT_ROUND_CONFIG);
   const [adapterConfig, setAdapterConfig] = useState<AdapterConfig>(
@@ -215,7 +198,7 @@ function HomeContent() {
               bgcolor: "primary.main",
             }}
           >
-            <BoxIcon size={18} color="#ffffff" />
+            <Cylinder size={18} color="#ffffff" />
           </Box>
           <Box>
             <Typography variant="subtitle2" fontWeight={600}>
@@ -239,7 +222,7 @@ function HomeContent() {
           }}
         >
           <Tab
-            icon={<BoxIcon size={16} />}
+            icon={<Cylinder size={16} />}
             iconPosition="start"
             label="Tubes"
             value="tube"
